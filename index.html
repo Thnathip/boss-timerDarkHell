@@ -282,7 +282,13 @@ function fmt(ms){
 function render(){
   timersDiv.innerHTML="";
   const now=Date.now();
-  Object.keys(timersData).forEach(k=>{
+
+  // แปลงเป็น array แล้ว sort จาก start ใหม่ล่าสุดไปเก่าสุด
+  const sortedKeys = Object.keys(timersData).sort((a,b)=>{
+    return timersData[b].start - timersData[a].start; // เรียงใหม่ล่าสุดขึ้นบน
+  });
+
+  sortedKeys.forEach(k=>{
     const t=timersData[k];
     const [map,ch,boss]=k.split("|");
     let status="⏳ ยังไม่เกิด";
