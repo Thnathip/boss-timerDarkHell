@@ -2,144 +2,39 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Boss Timer</title>
-
-<!-- favicon -->
-<link rel="icon" type="image/png" href="images/logo.png">
-
 <style>
-body{
-  font-family: Arial;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-  padding:20px;
-}
-
-h2{
-  color:#00ffd5;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
-
-.logo{
-  width:60px;
-  height:60px
-}
-
-select,button{
-  padding:8px;
-  margin:4px;
-  border-radius:6px;
-  border:none;
-}
-
-button{
-  background:#00ffd5;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.card{
-  display:flex;
-  gap:14px;
-  background:rgba(0,0,0,0.45);
-  border-radius:12px;
-  padding:12px;
-  margin-top:12px;
-  border-left:4px solid #00ffd5;
-}
-
-.img-box{
-  display:flex;
-  gap:8px
-}
-
-.boss-img,.map-img{
-  width:140px;
-  height:140px;
-  object-fit:cover;
-  border-radius:8px;
-}
-
-.boss-img{
-  border:2px solid #00ffd5
-}
-
-.map-img{
-  border:2px solid #ffaa00
-}
-
-.info b{
-  color:#00ffd5
-}
-
-.time{
-  margin-top:4px;
-  color:#7CFF00;
-}
-
-.spawn-time{
-  color:#ff4d4d;
-  font-weight:bold;
-}
-
-.window{
-  margin-top:4px;
-  font-weight:bold;
-}
-
-.CH1{color:#00e5ff}
-.CH2{color:#7CFF00}
-.CH3{color:#FFD700}
-.CH4{color:#FF9800}
-.CH5{color:#FF5252}
-
-.delete{
-  background:#ff4d4d;
-  color:#fff;
-  margin-top:6px;
-}
-
-.reset{
-  background:#ffaa00;
-  color:#000;
-  margin-top:6px;
-}
+body{font-family:Tahoma;background:#3e3e3e;color:white;padding:20px;}
+h2{text-align:center;margin-bottom:20px;}
+select,button{margin:5px;padding:5px;}
+.card{display:flex;background:#2e2e2e;margin:10px 0;padding:10px;border-radius:8px;overflow:hidden;position:relative;}
+.card.spawning{border:2px solid #00ff00;}
+.img-box{position:relative;width:120px;height:120px;flex-shrink:0;}
+.boss-img{position:absolute;width:100%;height:100%;object-fit:contain;}
+.map-img{position:absolute;width:50%;height:50%;bottom:0;right:0;object-fit:contain;opacity:0.7;}
+.info{margin-left:10px;}
+button.reset,button.delete{margin-right:5px;}
+button.muted{opacity:0.5;}
 </style>
 </head>
-
 <body>
 
-<h2>
-<img src="images/logo.png" class="logo">
-⏱ Boss Timer DARK HELL
-</h2>
-
-<div>
+<h2>Boss Timer</h2>
 <select id="map"></select>
 <select id="channel"></select>
 <select id="boss"></select>
-<button onclick="bossDead()">บอสตาย</button>
-</div>
-
-<h3>รายการจับเวลา</h3>
+<button id="bossDeadBtn">บอสตาย</button>
+<button id="soundToggle" onclick="toggleSound()">🔔 เสียงแจ้งเตือน</button>
 <div id="timers"></div>
 
-<script>
-
+<script type="module">
 // ================= CONFIG =================
-
 const NORMAL_RESPAWN = { min: 20, max: 30 };
-
-const SPECIAL_RESPAWN = {
-  "จินโฮ": { min: 120, max: 180 }
-};
+const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
 
 // ================= รูปบอส =================
-
 const BOSS_IMAGES = {
-
   "หัวหน้าลามะชั่ว":"images/1.png",
   "โฮนโดนยักษ์":"images/2.png",
   "อสูรไร้หัว":"images/3.png",
@@ -159,369 +54,221 @@ const BOSS_IMAGES = {
   "พญาวัวอสูร":"images/16.png",
   "มิโนทอร์":"images/18.png",
   "จินโฮ":"images/40.png"
-
-
 };
 
 // ================= รูปแผนที่ =================
-
 const MAP_IMAGES={
-  "ทับอีชา (อัพ4)":"images/map_tabicha.png",
-  "วาชองจี (อัพ4)":"images/map_wachongji.png",
-
-  "สุสานจักรพรรดิ์ (อัพ5)":"images/map_tomb.png",
-  "ชองจู (อัพ5)":"images/map_cheongju.png",
-
-  "แม่น้ำวังฮา (อัพ6)":"images/map_river.png",
-  "ทางเข้าถ้ำหินโยงมุน (อัพ6)":"images/map_yongmun.png",
-
-  "ทางเข้าถ้ำมักโก (อัพ7)":"images/map_makgo.png",
-  "ทะเลสาบโทซอง (อัพ7)":"images/map_lake.png",
-  "ถ้ำมักโกชั่นที่2 (อัพ7)":"images/map_makgo2.png",
-
-  "บริเวณแม่น้ำวังฮา (อัพ8)":"images/map_river2.png",
-  "ภูเขาแทซานใต้ (อัพ8)":"images/map_taesan_s.png",
-  "ภูเขาซุงซาน (อัพ8)":"images/map_sungsan.png",
-
-  "ยอดเขาแทซาน (อัพ9)":"images/map_taesan_top.png",
-  "ทางเหนือของภูเขาแทซาน (อัพ9)":"images/map_taesan_n.png",
-  "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png",
-
-  "กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
-  "โทนวัง (อัพ10)":"images/map_tonwang.png",
-  "วายอม (อัพ10)":"images/map_wayom.png",
-  "มิโนทอร์":"images/wayom.png",
+  "ทับอีชา":"images/map_tabicha.png",
+  "วาชองจี":"images/map_wachongji.png",
+  "สุสานจักรพรรดิ์":"images/map_tomb.png",
+  "ชองจู":"images/map_cheongju.png",
+  "แม่น้ำวังฮา":"images/map_river.png",
+  "ทางเข้าถ้ำหินโยงมุน":"images/map_yongmun.png",
+  "ทางเข้าถ้ำมักโก":"images/map_makgo.png",
+  "ทะเลสาบโทซอง":"images/map_lake.png",
+  "ถ้ำมักโกชั่นที่2":"images/map_makgo2.png",
+  "บริเวณแม่น้ำวังฮา":"images/map_river2.png",
+  "ภูเขาแทซานใต้":"images/map_taesan_s.png",
+  "ภูเขาซุงซาน":"images/map_sungsan.png",
+  "ยอดเขาแทซาน":"images/map_taesan_top.png",
+  "ทางเหนือของภูเขาแทซาน":"images/map_taesan_n.png",
+  "วัดเส้าหลิน":"images/map_shaolin.png",
+  "กำแพงเมืองจีน":"images/map_wall.png",
+  "โทนวัง":"images/map_tonwang.png",
   "ห้องจินโฮ":"images/map_jinho.png"
 };
 
 // ================= DATA =================
-
 const BOSS_DATA = {
-
-
-  "ทับอีชา (อัพ4)": {
-    "CH1": ["หัวหน้าลามะชั่ว"],
-    "CH2": ["หัวหน้าลามะชั่ว"],
-    "CH3": ["หัวหน้าลามะชั่ว"],
-    "CH4": ["หัวหน้าลามะชั่ว"],
-    "CH5": ["หัวหน้าลามะชั่ว"]
-  },
-  "วาชองจี (อัพ4)": {
-    "CH1": ["โฮนโดนยักษ์"],
-    "CH2": ["โฮนโดนยักษ์"],
-    "CH3": ["โฮนโดนยักษ์"],
-    "CH4": ["โฮนโดนยักษ์"],
-    "CH5": ["โฮนโดนยักษ์"]
-  },
-  "สุสานจักรพรรดิ์ อัพ5)": {
-    "CH1": ["อสูรไร้หัว"],
-    "CH2": ["อสูรไร้หัว"],
-    "CH3": ["อสูรไร้หัว"],
-    "CH4": ["อสูรไร้หัว"],
-    "CH5": ["อสูรไร้หัว"]
-  },
-  "ชองจู (อัพ5)": {
-    "CH1": ["ยอยอวา"],
-    "CH2": ["ยอยอวา"],
-    "CH3": ["ยอยอวา"],
-    "CH4": ["ยอยอวา"],
-    "CH5": ["ยอยอวา"]
-  },
-  "แม่น้ำวังฮา (อัพ6)": {
-    "CH1": ["ผีปังตอยักษ์"],
-    "CH2": ["ผีปังตอยักษ์"],
-    "CH3": ["ผีปังตอยักษ์"],
-    "CH4": ["ผีปังตอยักษ์"],
-    "CH5": ["ผีปังตอยักษ์"]
-  },
-  "ทางเข้าถ้ำหินโยงมุน (อัพ6)": {
-    "CH1": ["ต้นไม้ปีศาจหมื่นปี"],
-    "CH2": ["ต้นไม้ปีศาจหมื่นปี"],
-    "CH3": ["ต้นไม้ปีศาจหมื่นปี"],
-    "CH4": ["ต้นไม้ปีศาจหมื่นปี"],
-    "CH5": ["ต้นไม้ปีศาจหมื่นปี"]
-  },
-  "ทางเข้าถ้ำมักโก (อัพ7)": {
-    "CH1": ["ราชามาโบก"],
-    "CH2": ["ราชามาโบก"],
-    "CH3": ["ราชามาโบก"],
-    "CH4": ["ราชามาโบก"],
-    "CH5": ["ราชามาโบก"]
-  },
-  "ทะเลสาบโทซอง (อัพ7)": {
-    "CH1": ["พญาเต่าจอมตะกล"],
-    "CH2": ["พญาเต่าจอมตะกล"],
-    "CH3": ["พญาเต่าจอมตะกล"],
-    "CH4": ["พญาเต่าจอมตะกล"],
-    "CH5": ["พญาเต่าจอมตะกล"]
-  },
-  "ถ้ำมักโกชั่นที่2 (อัพ7)": {
-    "CH1": ["ปีศาจแสงจันทร์"],
-    "CH2": ["ปีศาจแสงจันทร์"],
-    "CH3": ["ปีศาจแสงจันทร์"],
-    "CH4": ["ปีศาจแสงจันทร์"],
-    "CH5": ["ปีศาจแสงจันทร์"]
-  },
-  "บริเวณแม่น้ำวังฮา (อัพ8)": {
-    "CH1": ["ยักษ์หินคึมกัง"],
-    "CH2": ["ยักษ์หินคึมกัง"],
-    "CH3": ["ยักษ์หินคึมกัง"],
-    "CH4": ["ยักษ์หินคึมกัง"],
-    "CH5": ["ยักษ์หินคึมกัง"]
-  },
-  "ภูเขาแทซานใต้ (อัพ8)": {
-    "CH1": ["ราชาอินโฮ"],
-    "CH2": ["ราชาอินโฮ"],
-    "CH3": ["ราชาอินโฮ"],
-    "CH4": ["ราชาอินโฮ"],
-    "CH5": ["ราชาอินโฮ"]
-  },
-  "ภูเขาซุงซาน (อัพ8)": {
-    "CH1": ["เบี้ยสีม่วง"],
-    "CH2": ["เบี้ยสีม่วง"],
-    "CH3": ["เบี้ยสีม่วง"],
-    "CH4": ["เบี้ยสีม่วง"],
-    "CH5": ["เบี้ยสีม่วง"]
-  },
-  "ยอดเขาแทซาน (อัพ9)": {
-    "CH1": ["หัวหน้าซานซีน"],
-    "CH2": ["หัวหน้าซานซีน"],
-    "CH3": ["หัวหน้าซานซีน"],
-    "CH4": ["หัวหน้าซานซีน"],
-    "CH5": ["หัวหน้าซานซีน"]
-  },
-  "ทางเหนือของภูเขาแทซาน (อัพ9)": {
-    "CH1": ["สมุนวานร"],
-    "CH2": ["สมุนวานร"],
-    "CH3": ["สมุนวานร"],
-    "CH4": ["สมุนวานร"],
-    "CH5": ["สมุนวานร"]
-  },
-  "วัดเส้าหลิน (อัพ9)": {
-    "CH1": ["นักบวชมูโฮน"],
-    "CH2": ["นักบวชมูโฮน"],
-    "CH3": ["นักบวชมูโฮน"],
-    "CH4": ["นักบวชมูโฮน"],
-    "CH5": ["นักบวชมูโฮน"]
-  },
-  "กำแพงเมืองจีน (อัพ10)": {
-    "CH1": ["จอมเวทย์ซุลซา"],
-    "CH2": ["จอมเวทย์ซุลซา"],
-    "CH3": ["จอมเวทย์ซุลซา"],
-    "CH4": ["จอมเวทย์ซุลซา"],
-    "CH5": ["จอมเวทย์ซุลซา"]
-  },
-  "โทนวัง (อัพ10)": {
-    "CH1": ["พญาวัวอสูร"],
-    "CH2": ["พญาวัวอสูร"],
-    "CH3": ["พญาวัวอสูร"],
-    "CH4": ["พญาวัวอสูร"],
-    "CH5": ["พญาวัวอสูร"]
-  },
-  "ภูเขาวายอม (อัพ10)": {
-  "CH1": ["มิโนทอร์"],
-  "CH2": ["มิโนทอร์"],
-  "CH3": ["มิโนทอร์"],
-  "CH4": ["มิโนทอร์"],
-  "CH5": ["มิโนทอร์"]
-},
-  "ห้องจินโฮ": {
-    "CH1": ["จินโฮ"],
-    "CH2": ["จินโฮ"],
-    "CH3": ["จินโฮ"],
-    "CH4": ["จินโฮ"],
-    "CH5": ["จินโฮ"]
-  }
+  "ทับอีชา": { "CH1": ["หัวหน้าลามะชั่ว"], "CH2": ["หัวหน้าลามะชั่ว"], "CH3": ["หัวหน้าลามะชั่ว"], "CH4": ["หัวหน้าลามะชั่ว"], "CH5": ["หัวหน้าลามะชั่ว"] },
+  "วาชองจี": { "CH1": ["โฮนโดนยักษ์"], "CH2": ["โฮนโดนยักษ์"], "CH3": ["โฮนโดนยักษ์"], "CH4": ["โฮนโดนยักษ์"], "CH5": ["โฮนโดนยักษ์"] },
+  "สุสานจักรพรรดิ์": { "CH1": ["อสูรไร้หัว"], "CH2": ["อสูรไร้หัว"], "CH3": ["อสูรไร้หัว"], "CH4": ["อสูรไร้หัว"], "CH5": ["อสูรไร้หัว"] },
+  "ชองจู": { "CH1": ["ยอยอวา"], "CH2": ["ยอยอวา"], "CH3": ["ยอยอวา"], "CH4": ["ยอยอวา"], "CH5": ["ยอยอวา"] },
+  "แม่น้ำวังฮา": { "CH1": ["ผีปังตอยักษ์"], "CH2": ["ผีปังตอยักษ์"], "CH3": ["ผีปังตอยักษ์"], "CH4": ["ผีปังตอยักษ์"], "CH5": ["ผีปังตอยักษ์"] },
+  "ทางเข้าถ้ำหินโยงมุน": { "CH1": ["ต้นไม้ปีศาจหมื่นปี"], "CH2": ["ต้นไม้ปีศาจหมื่นปี"], "CH3": ["ต้นไม้ปีศาจหมื่นปี"], "CH4": ["ต้นไม้ปีศาจหมื่นปี"], "CH5": ["ต้นไม้ปีศาจหมื่นปี"] },
+  "ทางเข้าถ้ำมักโก": { "CH1": ["ราชามาโบก"], "CH2": ["ราชามาโบก"], "CH3": ["ราชามาโบก"], "CH4": ["ราชามาโบก"], "CH5": ["ราชามาโบก"] },
+  "ทะเลสาบโทซอง": { "CH1": ["พญาเต่าจอมตะกล"], "CH2": ["พญาเต่าจอมตะกล"], "CH3": ["พญาเต่าจอมตะกล"], "CH4": ["พญาเต่าจอมตะกล"], "CH5": ["พญาเต่าจอมตะกล"] },
+  "ถ้ำมักโกชั่นที่2": { "CH1": ["ปีศาจแสงจันทร์"], "CH2": ["ปีศาจแสงจันทร์"], "CH3": ["ปีศาจแสงจันทร์"], "CH4": ["ปีศาจแสงจันทร์"], "CH5": ["ปีศาจแสงจันทร์"] },
+  "บริเวณแม่น้ำวังฮา": { "CH1": ["ยักษ์หินคึมกัง"], "CH2": ["ยักษ์หินคึมกัง"], "CH3": ["ยักษ์หินคึมกัง"], "CH4": ["ยักษ์หินคึมกัง"], "CH5": ["ยักษ์หินคึมกัง"] },
+  "ภูเขาแทซานใต้": { "CH1": ["ราชาอินโฮ"], "CH2": ["ราชาอินโฮ"], "CH3": ["ราชาอินโฮ"], "CH4": ["ราชาอินโฮ"], "CH5": ["ราชาอินโฮ"] },
+  "ภูเขาซุงซาน": { "CH1": ["เบี้ยสีม่วง"], "CH2": ["เบี้ยสีม่วง"], "CH3": ["เบี้ยสีม่วง"], "CH4": ["เบี้ยสีม่วง"], "CH5": ["เบี้ยสีม่วง"] },
+  "ยอดเขาแทซาน": { "CH1": ["หัวหน้าซานซีน"], "CH2": ["หัวหน้าซานซีน"], "CH3": ["หัวหน้าซานซีน"], "CH4": ["หัวหน้าซานซีน"], "CH5": ["หัวหน้าซานซีน"] },
+  "ทางเหนือของภูเขาแทซาน": { "CH1": ["สมุนวานร"], "CH2": ["สมุนวานร"], "CH3": ["สมุนวานร"], "CH4": ["สมุนวานร"], "CH5": ["สมุนวานร"] },
+  "วัดเส้าหลิน": { "CH1": ["นักบวชมูโฮน"], "CH2": ["นักบวชมูโฮน"], "CH3": ["นักบวชมูโฮน"], "CH4": ["นักบวชมูโฮน"], "CH5": ["นักบวชมูโฮน"] },
+  "กำแพงเมืองจีน": { "CH1": ["จอมเวทย์ซุลซา"], "CH2": ["จอมเวทย์ซุลซา"], "CH3": ["จอมเวทย์ซุลซา"], "CH4": ["จอมเวทย์ซุลซา"], "CH5": ["จอมเวทย์ซุลซา"] },
+  "โทนวัง": { "CH1": ["พญาวัวอสูร"], "CH2": ["พญาวัวอสูร"], "CH3": ["พญาวัวอสูร"], "CH4": ["พญาวัวอสูร"], "CH5": ["พญาวัวอสูร"] },
+  "ภูเขาวายอม": { "CH1": ["มิโนทอร์"], "CH2": ["มิโนทอร์"], "CH3": ["มิโนทอร์"], "CH4": ["มิโนทอร์"], "CH5": ["มิโนทอร์"] },
+  "ห้องจินโฮ": { "CH1": ["จินโฮ"], "CH2": ["จินโฮ"], "CH3": ["จินโฮ"], "CH4": ["จินโฮ"], "CH5": ["จินโฮ"] }
 };
 
-// ================= SCRIPT =================
-
+// ================= DOM =================
 const mapSel = document.getElementById("map");
 const chSel = document.getElementById("channel");
 const bossSel = document.getElementById("boss");
 const timersDiv = document.getElementById("timers");
+const soundToggleBtn = document.getElementById("soundToggle");
 
-function init(){
+// ================= STATE =================
+let timersData = {}; 
+let soundEnabled = localStorage.getItem("soundEnabled") !== "false";
+let audioContext = null;
+const notifiedTimers = new Set();
 
-  for(let m in BOSS_DATA){
-    mapSel.innerHTML += `<option>${m}</option>`;
+// ================= SOUND =================
+function updateSoundButton() {
+  if (soundEnabled) {
+    soundToggleBtn.innerHTML = "🔔 เสียงแจ้งเตือน";
+    soundToggleBtn.classList.remove("muted");
+  } else {
+    soundToggleBtn.innerHTML = "🔕 ปิดเสียงแจ้งเตือน";
+    soundToggleBtn.classList.add("muted");
   }
-
-  updateChannels();
-  render();
 }
 
-function updateChannels(){
+window.toggleSound = function() {
+  soundEnabled = !soundEnabled;
+  localStorage.setItem("soundEnabled", soundEnabled);
+  updateSoundButton();
+  if (soundEnabled) playNotificationSound();
+};
 
-  chSel.innerHTML="";
+function getAudioContext() {
+  if (!audioContext) audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  return audioContext;
+}
 
-  for(let c in BOSS_DATA[mapSel.value]){
-    chSel.innerHTML+=`<option>${c}</option>`;
-  }
+function playNotificationSound() {
+  if (!soundEnabled) return;
+  try {
+    const ctx = getAudioContext();
+    const now = ctx.currentTime;
+    for (let i = 0; i < 3; i++) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.type = "sine";
+      osc.frequency.value = 880;
+      const start = now + i*0.3;
+      const end = start + 0.15;
+      gain.gain.setValueAtTime(0,start);
+      gain.gain.linearRampToValueAtTime(0.5,start+0.02);
+      gain.gain.linearRampToValueAtTime(0,end);
+      osc.start(start);
+      osc.stop(end+0.1);
+    }
+  } catch(e){console.log("Audio error:",e);}
+}
 
+function requestNotificationPermission() {
+  if ("Notification" in window && Notification.permission === "default") Notification.requestPermission();
+}
+
+// ================= UTILS =================
+function fmt(ms){
+  const s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60);
+  return h>0 ? `${h}:${String(m%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}` : `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+}
+
+// ================= CORE =================
+function init() {
+  for (let m in BOSS_DATA) mapSel.innerHTML += `<option>${m}</option>`;
+  updateChannels();
+  updateSoundButton();
+  requestNotificationPermission();
+}
+
+function updateChannels() {
+  chSel.innerHTML = "";
+  for (let c in BOSS_DATA[mapSel.value]) chSel.innerHTML += `<option>${c}</option>`;
   updateBosses();
 }
 
-function updateBosses(){
-
-  bossSel.innerHTML="";
-
-  BOSS_DATA[mapSel.value][chSel.value].forEach(b=>{
-    bossSel.innerHTML+=`<option>${b}</option>`;
-  });
-
+function updateBosses() {
+  bossSel.innerHTML = "";
+  BOSS_DATA[mapSel.value][chSel.value].forEach(b => bossSel.innerHTML += `<option>${b}</option>`);
 }
 
 mapSel.onchange = updateChannels;
 chSel.onchange = updateBosses;
 
-function bossDead(){
-
+function bossDead() {
   const key = `${mapSel.value}|${chSel.value}|${bossSel.value}`;
-
   const now = Date.now();
-
   const r = SPECIAL_RESPAWN[bossSel.value] || NORMAL_RESPAWN;
-
-  localStorage.setItem(key, JSON.stringify({
-
-    start: now,
-    minTime: now + r.min * 60000,
-    maxTime: now + r.max * 60000
-
-  }));
-
+  timersData[key] = { start: now, minTime: now+r.min*60000, maxTime: now+r.max*60000 };
   render();
 }
-
-// ===== เพิ่มฟังก์ชันรีเซ็ตเวลา =====
 
 function resetTimer(key){
-
   const now = Date.now();
-
-  const parts = key.split("|");
-  const boss = parts[2];
-
+  const boss = key.split("|")[2];
   const r = SPECIAL_RESPAWN[boss] || NORMAL_RESPAWN;
-
-  localStorage.setItem(key, JSON.stringify({
-
-    start: now,
-    minTime: now + r.min * 60000,
-    maxTime: now + r.max * 60000
-
-  }));
-
+  timersData[key] = { start: now, minTime: now+r.min*60000, maxTime: now+r.max*60000 };
   render();
 }
 
-function deleteTimer(k){
-
-  localStorage.removeItem(k);
+function deleteTimer(key){
+  delete timersData[key];
+  notifiedTimers.delete(key);
   render();
-
 }
 
-function fmt(ms){
-
-  const s=Math.floor(ms/1000);
-  const m=Math.floor(s/60);
-  const h=Math.floor(m/60);
-
-  return h>0
-    ? `${h}:${String(m%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`
-    : `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-
+function checkSpawnNotifications(list){
+  const now = Date.now();
+  list.forEach(i=>{
+    const t=i.data;
+    const key=i.key;
+    const isSpawning = now>=t.minTime && now<=t.maxTime;
+    if(isSpawning && !notifiedTimers.has(key)){
+      playNotificationSound();
+      notifiedTimers.add(key);
+      if(Notification.permission==="granted"){
+        const [map,ch,boss]=key.split("|");
+        new Notification("🐉 Boss กำลังจะเกิด!",{body:`${boss} - ${map} (${ch})`,icon:BOSS_IMAGES[boss],tag:key});
+      }
+    }
+    if(now>t.maxTime) notifiedTimers.delete(key);
+  });
 }
 
 function render(){
-
   timersDiv.innerHTML="";
-
-  const now = Date.now();
-
+  const now=Date.now();
   const list=[];
-
-  Object.keys(localStorage).forEach(k=>{
-    if(k.includes("|")){
-      list.push({key:k,data:JSON.parse(localStorage[k])});
-    }
-  });
-
+  Object.keys(timersData).forEach(k=>list.push({key:k,data:timersData[k]}));
   list.sort((a,b)=>b.data.start-a.data.start);
+  checkSpawnNotifications(list);
 
   list.forEach(i=>{
-
-    const parts = i.key.split("|");
-    const map = parts[0];
-    const ch = parts[1];
-    const boss = parts[2];
-
+    const [map,ch,boss]=i.key.split("|");
     const t=i.data;
-
-    let status="⏳ ยังไม่ถึงเวลาเกิด";
-
-    if(now>=t.minTime && now<=t.maxTime){
-      status="✅ อยู่ในช่วงเกิด";
-    }
-
-    if(now>t.maxTime){
-      status="⛔ ครบเวลาแล้ว";
-    }
+    let status="⏳ ยังไม่ถึงเวลาเกิด",cardClass="card";
+    if(now>=t.minTime && now<=t.maxTime){status="✅ อยู่ในช่วงเกิด";cardClass="card spawning";}
+    if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
 
     timersDiv.innerHTML+=`
-
-    <div class="card">
-
-      <div class="img-box">
-
-        <img src="${BOSS_IMAGES[boss]}" class="boss-img">
-
-        <img src="${MAP_IMAGES[map]}" class="map-img">
-
-      </div>
-
-      <div class="info">
-
-        <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
-
-        <div class="time">
-        ⏱ จับเวลา ${fmt(now - t.start)}
-        </div>
-
-        <div class="time spawn-time">
-
-        🕒 ช่วงเกิด 
-        ${new Date(t.minTime).toLocaleTimeString()} 
-        - 
-        ${new Date(t.maxTime).toLocaleTimeString()}
-
-        </div>
-
-        <div class="window">${status}</div>
-
-        <button class="reset" onclick="resetTimer('${i.key}')">
-        รีเซ็ตเวลา
-        </button>
-
-        <button class="delete" onclick="deleteTimer('${i.key}')">
-        ลบ
-        </button>
-
-      </div>
-
-    </div>`;
-
+<div class="${cardClass}">
+  <div class="img-box">
+    <img src="${BOSS_IMAGES[boss]}" class="boss-img">
+    <img src="${MAP_IMAGES[map]}" class="map-img">
+  </div>
+  <div class="info">
+    <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+    <div class="time">⏱ จับเวลา ${fmt(now - t.start)}</div>
+    <div class="time spawn-time">🕒 ช่วงเกิด ${new Date(t.minTime).toLocaleTimeString('th-TH')} - ${new Date(t.maxTime).toLocaleTimeString('th-TH')}</div>
+    <div class="window">${status}</div>
+    <button class="reset" onclick="resetTimer('${i.key}')">รีเซ็ตเวลา</button>
+    <button class="delete" onclick="deleteTimer('${i.key}')">ลบ</button>
+  </div>
+</div>`;
   });
-
 }
 
+document.getElementById("bossDeadBtn").onclick=bossDead;
+
 setInterval(render,1000);
-
 init();
-
 </script>
-
 </body>
 </html>
