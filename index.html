@@ -6,14 +6,11 @@
 <link rel="icon" type="image/png" href="images/logo.png">
 
 <style>
-html,body{
-  margin:0;
-  padding:0;
-  width:100%;
-  min-height:100%;
+body{
+  font-family: Arial;
   background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
-  font-family:Arial;
+  padding:20px;
 }
 
 h2{
@@ -22,10 +19,12 @@ h2{
   align-items:center;
   gap:12px;
 }
+
 .logo{
   width:60px;
   height:60px
 }
+
 select,button{
   padding:8px;
   margin:4px;
@@ -35,19 +34,8 @@ select,button{
 
 button{
   background:#00ffd5;
+  font-weight:bold;
   cursor:pointer;
-}
-
-.reset-btn{
-  background:#FFD700;
-  color:#000;
-  font-weight:bold;
-}
-
-.delete-btn{
-  background:#FF4D4D;
-  color:#fff;
-  font-weight:bold;
 }
 
 .card{
@@ -56,18 +44,66 @@ button{
   background:rgba(0,0,0,0.45);
   border-radius:12px;
   padding:12px;
-  margin:12px;
+  margin-top:12px;
   border-left:4px solid #00ffd5;
 }
 
-.img-box img{
-  width:120px;
-  height:120px;
+.img-box{
+  display:flex;
+  gap:8px
+}
+
+.boss-img,.map-img{
+  width:140px;
+  height:140px;
+  object-fit:cover;
   border-radius:8px;
 }
 
-.time{color:#7CFF00;}
-.spawn{color:#ff4d4d;font-weight:bold;}
+.boss-img{
+  border:2px solid #00ffd5
+}
+
+.map-img{
+  border:2px solid #ffaa00
+}
+
+.info b{
+  color:#00ffd5
+}
+
+.time{
+  margin-top:4px;
+  color:#7CFF00;
+}
+
+.spawn-time{
+  color:#ff4d4d;
+  font-weight:bold;
+}
+
+.window{
+  margin-top:4px;
+  font-weight:bold;
+}
+
+.CH1{color:#00e5ff}
+.CH2{color:#7CFF00}
+.CH3{color:#FFD700}
+.CH4{color:#FF9800}
+.CH5{color:#FF5252}
+
+.delete{
+  background:#ff4d4d;
+  color:#fff;
+  margin-top:6px;
+}
+
+.reset{
+  background:#ffaa00;
+  color:#000;
+  margin-top:6px;
+}
 </style>
 </head>
 
