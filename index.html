@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Boss Timer</title>
+  <!-- favicon -->
+<link rel="icon" type="image/png" href="images/logo.png">
 
 <style>
 html,body{
@@ -56,20 +58,6 @@ button{
   border-left:4px solid #00ffd5;
 }
 
-.card.pulse{
-  border-left-color:#ff4d4d;
-  animation:pulse 1s infinite;
-}
-
-.card.done{
-  border-left-color:#888;
-  opacity:0.7;
-}
-
-@keyframes pulse{
-  50%{transform:scale(1.03);}
-}
-
 .img-box img{
   width:120px;
   height:120px;
@@ -82,9 +70,10 @@ button{
 </head>
 
 <body>
-
-<h2>⏱ Boss Timer DARK HELL</h2>
-
+<h2>
+<img src="images/logo.png" class="logo">
+⏱ Boss Timer DARK HELL
+</h2>
 <div>
 <select id="map"></select>
 <select id="channel"></select>
@@ -194,7 +183,7 @@ const SPECIAL_RESPAWN = {
       "CH4": ["โฮนโดนยักษ์"],
       "CH5": ["โฮนโดนยักษ์"]
     },
-    "สุสานจักรพรรดิ์ อัพ5)": {
+    "สุสานจักรพรรดิ์ (อัพ5)": {
       "CH1": ["อสูรไร้หัว"],
       "CH2": ["อสูรไร้หัว"],
       "CH3": ["อสูรไร้หัว"],
@@ -399,10 +388,10 @@ function render(){
     let status="⏳ ยังไม่เกิด";
     let cls="card";
 
-    if(now>=t.minTime && now<=t.maxTime){
-      status="🔥 บอสกำลังเกิด";
-      cls="card pulse";
-    }
+ if(now>=t.minTime && now<=t.maxTime){
+  status="🔥 บอสกำลังเกิด";
+  cls="card";
+}
 
     if(now>t.maxTime){
       status="⌛ ครบเวลาแล้ว";
