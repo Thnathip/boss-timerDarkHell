@@ -267,13 +267,17 @@ function deleteTimer(key){
   db.ref("bossTimers/"+key).remove();
 }
 
-// ================= FORMAT =================
 function fmt(ms){
+
   const s=Math.floor(ms/1000);
   const m=Math.floor(s/60);
-  return `${m}:${String(s%60).padStart(2,"0")}`;
-}
+  const h=Math.floor(m/60);
 
+  return h>0
+    ? `${h}:${String(m%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`
+    : `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+
+}
 // ================= RENDER =================
 function render(){
   timersDiv.innerHTML="";
