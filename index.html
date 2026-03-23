@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <title>Boss Timer</title>
+
+<!-- favicon -->
 <link rel="icon" type="image/png" href="images/logo.png">
 
 <style>
@@ -22,7 +24,7 @@ h2{
 
 .logo{
   width:60px;
-  height:60px
+  height:60px;
 }
 
 select,button{
@@ -50,7 +52,7 @@ button{
 
 .img-box{
   display:flex;
-  gap:8px
+  gap:8px;
 }
 
 .boss-img,.map-img{
@@ -61,15 +63,15 @@ button{
 }
 
 .boss-img{
-  border:2px solid #00ffd5
+  border:2px solid #00ffd5;
 }
 
 .map-img{
-  border:2px solid #ffaa00
+  border:2px solid #ffaa00;
 }
 
 .info b{
-  color:#00ffd5
+  color:#00ffd5;
 }
 
 .time{
@@ -108,6 +110,7 @@ button{
 </head>
 
 <body>
+
 <h2>
 <img src="images/logo.png" class="logo">
 ⏱ Boss Timer DARK HELL
@@ -120,6 +123,7 @@ button{
 <button onclick="bossDead()">บอสตาย</button>
 </div>
 
+<h3>รายการจับเวลา</h3>
 <div id="timers"></div>
 
 <!-- Firebase -->
@@ -127,7 +131,8 @@ button{
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// ===== CONFIG FIREBASE =====
+// ================= CONFIG =================
+
 const firebaseConfig = {
   apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
   authDomain: "bosstimer-22b86.firebaseapp.com",
@@ -137,13 +142,10 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// ===== RESPAWN TIME =====
 const NORMAL_RESPAWN = { min: 20, max: 30 };
-const SPECIAL_RESPAWN = {
-  "จินโฮ": { min: 120, max: 180 }
-};
+const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
 
-// ===== BOSS IMAGES =====
+// ================= รูปบอส =================
 const BOSS_IMAGES = {
   "หัวหน้าลามะชั่ว":"images/1.png",
   "โฮนโดนยักษ์":"images/2.png",
@@ -166,7 +168,7 @@ const BOSS_IMAGES = {
   "จินโฮ":"images/40.png"
 };
 
-// ===== MAP IMAGES =====
+// ================= แผนที่ =================
 const MAP_IMAGES={
   "ทับอีชา (อัพ4)":"images/map_tabicha.png",
   "วาชองจี (อัพ4)":"images/map_wachongji.png",
@@ -190,41 +192,39 @@ const MAP_IMAGES={
   "ห้องจินโฮ":"images/map_jinho.png"
 };
 
-// ===== BOSS DATA =====
+// ================= DATA =================
 const BOSS_DATA = {
-  "ทับอีชา (อัพ4)": { "CH1":["หัวหน้าลามะชั่ว"], "CH2":["หัวหน้าลามะชั่ว"], "CH3":["หัวหน้าลามะชั่ว"], "CH4":["หัวหน้าลามะชั่ว"], "CH5":["หัวหน้าลามะชั่ว"] },
-  "วาชองจี (อัพ4)": { "CH1":["โฮนโดนยักษ์"], "CH2":["โฮนโดนยักษ์"], "CH3":["โฮนโดนยักษ์"], "CH4":["โฮนโดนยักษ์"], "CH5":["โฮนโดนยักษ์"] },
-  "สุสานจักรพรรดิ์ (อัพ5)": { "CH1":["อสูรไร้หัว"], "CH2":["อสูรไร้หัว"], "CH3":["อสูรไร้หัว"], "CH4":["อสูรไร้หัว"], "CH5":["อสูรไร้หัว"] },
-  "ชองจู (อัพ5)": { "CH1":["ยอยอวา"], "CH2":["ยอยอวา"], "CH3":["ยอยอวา"], "CH4":["ยอยอวา"], "CH5":["ยอยอวา"] },
-  "แม่น้ำวังฮา (อัพ6)": { "CH1":["ผีปังตอยักษ์"], "CH2":["ผีปังตอยักษ์"], "CH3":["ผีปังตอยักษ์"], "CH4":["ผีปังตอยักษ์"], "CH5":["ผีปังตอยักษ์"] },
-  "ทางเข้าถ้ำหินโยงมุน (อัพ6)": { "CH1":["ต้นไม้ปีศาจหมื่นปี"], "CH2":["ต้นไม้ปีศาจหมื่นปี"], "CH3":["ต้นไม้ปีศาจหมื่นปี"], "CH4":["ต้นไม้ปีศาจหมื่นปี"], "CH5":["ต้นไม้ปีศาจหมื่นปี"] },
-  "ทางเข้าถ้ำมักโก (อัพ7)": { "CH1":["ราชามาโบก"], "CH2":["ราชามาโบก"], "CH3":["ราชามาโบก"], "CH4":["ราชามาโบก"], "CH5":["ราชามาโบก"] },
-  "ทะเลสาบโทซอง (อัพ7)": { "CH1":["พญาเต่าจอมตะกล"], "CH2":["พญาเต่าจอมตะกล"], "CH3":["พญาเต่าจอมตะกล"], "CH4":["พญาเต่าจอมตะกล"], "CH5":["พญาเต่าจอมตะกล"] },
-  "ถ้ำมักโกชั่นที่2 (อัพ7)": { "CH1":["ปีศาจแสงจันทร์"], "CH2":["ปีศาจแสงจันทร์"], "CH3":["ปีศาจแสงจันทร์"], "CH4":["ปีศาจแสงจันทร์"], "CH5":["ปีศาจแสงจันทร์"] },
-  "บริเวณแม่น้ำวังฮา (อัพ8)": { "CH1":["ยักษ์หินคึมกัง"], "CH2":["ยักษ์หินคึมกัง"], "CH3":["ยักษ์หินคึมกัง"], "CH4":["ยักษ์หินคึมกัง"], "CH5":["ยักษ์หินคึมกัง"] },
-  "ภูเขาแทซานใต้ (อัพ8)": { "CH1":["ราชาอินโฮ"], "CH2":["ราชาอินโฮ"], "CH3":["ราชาอินโฮ"], "CH4":["ราชาอินโฮ"], "CH5":["ราชาอินโฮ"] },
-  "ภูเขาซุงซาน (อัพ8)": { "CH1":["เบี้ยสีม่วง"], "CH2":["เบี้ยสีม่วง"], "CH3":["เบี้ยสีม่วง"], "CH4":["เบี้ยสีม่วง"], "CH5":["เบี้ยสีม่วง"] },
-  "ยอดเขาแทซาน (อัพ9)": { "CH1":["หัวหน้าซานซีน"], "CH2":["หัวหน้าซานซีน"], "CH3":["หัวหน้าซานซีน"], "CH4":["หัวหน้าซานซีน"], "CH5":["หัวหน้าซานซีน"] },
-  "ทางเหนือของภูเขาแทซาน (อัพ9)": { "CH1":["สมุนวานร"], "CH2":["สมุนวานร"], "CH3":["สมุนวานร"], "CH4":["สมุนวานร"], "CH5":["สมุนวานร"] },
-  "วัดเส้าหลิน (อัพ9)": { "CH1":["นักบวชมูโฮน"], "CH2":["นักบวชมูโฮน"], "CH3":["นักบวชมูโฮน"], "CH4":["นักบวชมูโฮน"], "CH5":["นักบวชมูโฮน"] },
-  "กำแพงเมืองจีน (อัพ10)": { "CH1":["จอมเวทย์ซุลซา"], "CH2":["จอมเวทย์ซุลซา"], "CH3":["จอมเวทย์ซุลซา"], "CH4":["จอมเวทย์ซุลซา"], "CH5":["จอมเวทย์ซุลซา"] },
-  "โทนวัง (อัพ10)": { "CH1":["พญาวัวอสูร"], "CH2":["พญาวัวอสูร"], "CH3":["พญาวัวอสูร"], "CH4":["พญาวัวอสูร"], "CH5":["พญาวัวอสูร"] },
-  "ภูเขาวายอม (อัพ10)": { "CH1":["มิโนทอร์"], "CH2":["มิโนทอร์"], "CH3":["มิโนทอร์"], "CH4":["มิโนทอร์"], "CH5":["มิโนทอร์"] },
-  "ห้องจินโฮ": { "CH1":["จินโฮ"], "CH2":["จินโฮ"], "CH3":["จินโฮ"], "CH4":["จินโฮ"], "CH5":["จินโฮ"] }
+  "ทับอีชา (อัพ4)": {"CH1":["หัวหน้าลามะชั่ว"],"CH2":["หัวหน้าลามะชั่ว"],"CH3":["หัวหน้าลามะชั่ว"],"CH4":["หัวหน้าลามะชั่ว"],"CH5":["หัวหน้าลามะชั่ว"]},
+  "วาชองจี (อัพ4)": {"CH1":["โฮนโดนยักษ์"],"CH2":["โฮนโดนยักษ์"],"CH3":["โฮนโดนยักษ์"],"CH4":["โฮนโดนยักษ์"],"CH5":["โฮนโดนยักษ์"]},
+  "สุสานจักรพรรดิ์ (อัพ5)": {"CH1":["อสูรไร้หัว"],"CH2":["อสูรไร้หัว"],"CH3":["อสูรไร้หัว"],"CH4":["อสูรไร้หัว"],"CH5":["อสูรไร้หัว"]},
+  "ชองจู (อัพ5)": {"CH1":["ยอยอวา"],"CH2":["ยอยอวา"],"CH3":["ยอยอวา"],"CH4":["ยอยอวา"],"CH5":["ยอยอวา"]},
+  "แม่น้ำวังฮา (อัพ6)": {"CH1":["ผีปังตอยักษ์"],"CH2":["ผีปังตอยักษ์"],"CH3":["ผีปังตอยักษ์"],"CH4":["ผีปังตอยักษ์"],"CH5":["ผีปังตอยักษ์"]},
+  "ทางเข้าถ้ำหินโยงมุน (อัพ6)": {"CH1":["ต้นไม้ปีศาจหมื่นปี"],"CH2":["ต้นไม้ปีศาจหมื่นปี"],"CH3":["ต้นไม้ปีศาจหมื่นปี"],"CH4":["ต้นไม้ปีศาจหมื่นปี"],"CH5":["ต้นไม้ปีศาจหมื่นปี"]},
+  "ทางเข้าถ้ำมักโก (อัพ7)": {"CH1":["ราชามาโบก"],"CH2":["ราชามาโบก"],"CH3":["ราชามาโบก"],"CH4":["ราชามาโบก"],"CH5":["ราชามาโบก"]},
+  "ทะเลสาบโทซอง (อัพ7)": {"CH1":["พญาเต่าจอมตะกล"],"CH2":["พญาเต่าจอมตะกล"],"CH3":["พญาเต่าจอมตะกล"],"CH4":["พญาเต่าจอมตะกล"],"CH5":["พญาเต่าจอมตะกล"]},
+  "ถ้ำมักโกชั่นที่2 (อัพ7)": {"CH1":["ปีศาจแสงจันทร์"],"CH2":["ปีศาจแสงจันทร์"],"CH3":["ปีศาจแสงจันทร์"],"CH4":["ปีศาจแสงจันทร์"],"CH5":["ปีศาจแสงจันทร์"]},
+  "บริเวณแม่น้ำวังฮา (อัพ8)": {"CH1":["ยักษ์หินคึมกัง"],"CH2":["ยักษ์หินคึมกัง"],"CH3":["ยักษ์หินคึมกัง"],"CH4":["ยักษ์หินคึมกัง"],"CH5":["ยักษ์หินคึมกัง"]},
+  "ภูเขาแทซานใต้ (อัพ8)": {"CH1":["ราชาอินโฮ"],"CH2":["ราชาอินโฮ"],"CH3":["ราชาอินโฮ"],"CH4":["ราชาอินโฮ"],"CH5":["ราชาอินโฮ"]},
+  "ภูเขาซุงซาน (อัพ8)": {"CH1":["เบี้ยสีม่วง"],"CH2":["เบี้ยสีม่วง"],"CH3":["เบี้ยสีม่วง"],"CH4":["เบี้ยสีม่วง"],"CH5":["เบี้ยสีม่วง"]},
+  "ยอดเขาแทซาน (อัพ9)": {"CH1":["หัวหน้าซานซีน"],"CH2":["หัวหน้าซานซีน"],"CH3":["หัวหน้าซานซีน"],"CH4":["หัวหน้าซานซีน"],"CH5":["หัวหน้าซานซีน"]},
+  "ทางเหนือของภูเขาแทซาน (อัพ9)": {"CH1":["สมุนวานร"],"CH2":["สมุนวานร"],"CH3":["สมุนวานร"],"CH4":["สมุนวานร"],"CH5":["สมุนวานร"]},
+  "วัดเส้าหลิน (อัพ9)": {"CH1":["นักบวชมูโฮน"],"CH2":["นักบวชมูโฮน"],"CH3":["นักบวชมูโฮน"],"CH4":["นักบวชมูโฮน"],"CH5":["นักบวชมูโฮน"]},
+  "กำแพงเมืองจีน (อัพ10)": {"CH1":["จอมเวทย์ซุลซา"],"CH2":["จอมเวทย์ซุลซา"],"CH3":["จอมเวทย์ซุลซา"],"CH4":["จอมเวทย์ซุลซา"],"CH5":["จอมเวทย์ซุลซา"]},
+  "โทนวัง (อัพ10)": {"CH1":["พญาวัวอสูร"],"CH2":["พญาวัวอสูร"],"CH3":["พญาวัวอสูร"],"CH4":["พญาวัวอสูร"],"CH5":["พญาวัวอสูร"]},
+  "ภูเขาวายอม (อัพ10)": {"CH1":["มิโนทอร์"],"CH2":["มิโนทอร์"],"CH3":["มิโนทอร์"],"CH4":["มิโนทอร์"],"CH5":["มิโนทอร์"]},
+  "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
 };
 
-// ===== UI =====
+// ================= UI =================
 const mapSel=document.getElementById("map");
 const chSel=document.getElementById("channel");
 const bossSel=document.getElementById("boss");
 const timersDiv=document.getElementById("timers");
 let timersData={};
 
-// ===== INIT =====
+// ================= INIT =================
 function init(){
-  for(let m in BOSS_DATA){
-    mapSel.innerHTML+=`<option>${m}</option>`;
-  }
+  for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
   updateChannels();
   db.ref("bossTimers").on("value",snap=>{
     timersData=snap.val()||{};
@@ -232,104 +232,72 @@ function init(){
   });
 }
 
+// ================= CHANNEL & BOSS =================
 function updateChannels(){
   chSel.innerHTML="";
-  for(let c in BOSS_DATA[mapSel.value]){
-    chSel.innerHTML+=`<option>${c}</option>`;
-  }
-  updateBoss();
+  for(let c in BOSS_DATA[mapSel.value]) chSel.innerHTML+=`<option>${c}</option>`;
+  updateBosses();
 }
 
-function updateBoss(){
+function updateBosses(){
   bossSel.innerHTML="";
-  BOSS_DATA[mapSel.value][chSel.value].forEach(b=>{
-    bossSel.innerHTML+=`<option>${b}</option>`;
-  });
+  BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
 }
 
 mapSel.onchange=updateChannels;
-chSel.onchange=updateBoss;
+chSel.onchange=updateBosses;
 
-// ===== ACTION =====
+// ================= ACTION =================
 function bossDead(){
   const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
   const now=Date.now();
-  const respawn = SPECIAL_RESPAWN[bossSel.value] || NORMAL_RESPAWN;
-
-  db.ref("bossTimers/"+key).set({
-    start: now,
-    minTime: now + respawn.min*60000,
-    maxTime: now + respawn.max*60000
-  });
+  const r=SPECIAL_RESPAWN[bossSel.value]||NORMAL_RESPAWN;
+  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000});
 }
 
 function resetTimer(key){
-  const boss = key.split("|")[2];
-  const respawn = SPECIAL_RESPAWN[boss] || NORMAL_RESPAWN;
+  const parts=key.split("|");
+  const boss=parts[2];
+  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
   const now=Date.now();
-
-  db.ref("bossTimers/"+key).set({
-    start: now,
-    minTime: now + respawn.min*60000,
-    maxTime: now + respawn.max*60000
-  });
+  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000});
 }
 
 function deleteTimer(key){
   db.ref("bossTimers/"+key).remove();
 }
 
-// ===== FORMAT =====
+// ================= FORMAT =================
 function fmt(ms){
   const s=Math.floor(ms/1000);
   const m=Math.floor(s/60);
   return `${m}:${String(s%60).padStart(2,"0")}`;
 }
 
-// ===== RENDER =====
+// ================= RENDER =================
 function render(){
   timersDiv.innerHTML="";
   const now=Date.now();
-
   Object.keys(timersData).forEach(k=>{
     const t=timersData[k];
     const [map,ch,boss]=k.split("|");
-
     let status="⏳ ยังไม่เกิด";
-    let cls="card";
-
-    if(now>=t.minTime && now<=t.maxTime){
-      status="🔥 บอสกำลังเกิด";
-      cls="card";
-    }
-    if(now>t.maxTime){
-      status="⌛ ครบเวลาแล้ว";
-      cls="card done";
-    }
+    if(now>=t.minTime&&now<=t.maxTime) status="✅ อยู่ในช่วงเกิด";
+    if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
 
     timersDiv.innerHTML+=`
-    <div class="${cls}">
+    <div class="card">
       <div class="img-box">
-        <img src="${BOSS_IMAGES[boss]||''}">
-        <img src="${MAP_IMAGES[map]||''}">
+        <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
+        <img src="${MAP_IMAGES[map]||''}" class="map-img">
       </div>
-
-      <div>
-        <b>${map} | ${ch} | ${boss}</b>
-
-        <div class="time">
-          ⏱ เวลา: ${fmt(now-t.start)}
-        </div>
-
-        <div class="spawn">
-          🕒 ${new Date(t.minTime).toLocaleTimeString()} - 
-          ${new Date(t.maxTime).toLocaleTimeString()}
-        </div>
-
-        <div>${status}</div>
-
-        <button class="reset-btn" onclick="resetTimer('${k}')">รีเซ็ต</button>
-        <button class="delete-btn" onclick="deleteTimer('${k}')">ลบ</button>
+      <div class="info">
+        <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+        <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
+        <div class="time spawn-time">🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}</div>
+        <div class="window">${status}</div>
+        <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
+        <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
       </div>
     </div>`;
   });
