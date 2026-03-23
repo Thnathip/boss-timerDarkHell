@@ -3,134 +3,107 @@
 <head>
 <meta charset="UTF-8">
 <title>Boss Timer</title>
-<link rel="icon" type="image/png" href="images/logo.png">
+<link rel="icon" href="https://drive.google.com/thumbnail?id=1mNVtdSFCXznAZpZgdQ-Dbllr1Xa1fiUq">
 
 <style>
-body{
-  font-family: Arial;
+html,body{
+  margin:0;
+  padding:0;
+  width:100%;
+  min-height:100%;
   background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
   color:#fff;
-  padding:20px;
+  font-family:Arial;
 }
 h2{
   color:#00ffd5;
   display:flex;
   align-items:center;
   gap:12px;
+  padding:10px;
 }
 .logo{width:60px;height:60px}
 select,button{
   padding:8px;margin:4px;border-radius:6px;border:none;
 }
-button{
-  background:#00ffd5;font-weight:bold;cursor:pointer;
-}
+button{background:#00ffd5;font-weight:bold;cursor:pointer;}
 button.muted{opacity:0.5;background:#555;color:#ccc;}
+
 .card{
-  display:flex;gap:14px;background:rgba(0,0,0,0.45);
-  border-radius:12px;padding:12px;margin-top:12px;
+  display:flex;gap:14px;
+  background:rgba(0,0,0,0.45);
+  border-radius:12px;
+  padding:12px;
+  margin:12px;
   border-left:4px solid #00ffd5;
-  transition: transform 0.3s ease;
 }
 .card.pulse{
-  animation: pulse 1s infinite;
+  animation:pulse 1s infinite;
   border-left-color:#ff4d4d;
 }
 @keyframes pulse{
-  0% { transform: scale(1); box-shadow: 0 0 0 rgba(255,77,77,0.7); }
   50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,77,77,0.7); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(255,77,77,0.7); }
 }
 .img-box{display:flex;gap:8px;}
-.boss-img,.map-img{width:140px;height:140px;object-fit:cover;border-radius:8px;}
+.boss-img,.map-img{
+  width:140px;height:140px;
+  object-fit:cover;border-radius:8px;
+}
 .boss-img{border:2px solid #00ffd5;}
 .map-img{border:2px solid #ffaa00;}
 .info b{color:#00ffd5;}
-.time{margin-top:4px;color:#7CFF00;}
+.time{color:#7CFF00;}
 .spawn-time{color:#ff4d4d;font-weight:bold;}
-.window{margin-top:4px;font-weight:bold;}
-.CH1{color:#00e5ff}
-.CH2{color:#7CFF00}
-.CH3{color:#FFD700}
-.CH4{color:#FF9800}
-.CH5{color:#FF5252}
-.delete{background:#ff4d4d;color:#fff;margin-top:6px;}
-.reset{background:#ffaa00;color:#000;margin-top:6px;}
+.window{font-weight:bold;}
 </style>
 </head>
+
 <body>
 
 <h2>
-<img src="images/logo.png" class="logo">
+<img src="https://drive.google.com/thumbnail?id=1mNVtdSFCXznAZpZgdQ-Dbllr1Xa1fiUq" class="logo">
 ⏱ Boss Timer DARK HELL
 </h2>
 
-<div>
+<div style="padding:10px;">
 <select id="map"></select>
 <select id="channel"></select>
 <select id="boss"></select>
 <button onclick="bossDead()">บอสตาย</button>
-<button id="soundToggle" onclick="toggleSound()">🔔 เสียงแจ้งเตือน</button>
 </div>
 
-<h3>รายการจับเวลา</h3>
 <div id="timers"></div>
 
+<!-- 🔥 Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+
 <script>
-// ================= CONFIG =================
-const NORMAL_RESPAWN = { min: 20, max: 30 };
-const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
+const firebaseConfig = {
+  apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
+  authDomain: "bosstimer-22b86.firebaseapp.com",
+  databaseURL: "https://bosstimer-22b86-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "bosstimer-22b86",
+};
 
-// ================= STATE =================
-let timersData = {}; // ตัวแปรเก็บ boss timer
-let soundEnabled = localStorage.getItem("soundEnabled") !== "false";
-let notifiedTimers = new Set();
-let audioContext = null;
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
 
-// ================= UTILS =================
-function fmt(ms){
-  const s=Math.floor(ms/1000), m=Math.floor(s/60), h=Math.floor(m/60);
-  return h>0 ? `${h}:${String(m%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}` 
-             : `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
-}
-function getAudioContext(){ if(!audioContext) audioContext=new (window.AudioContext||window.webkitAudioContext)(); return audioContext; }
-function playNotificationSound(){
-  if(!soundEnabled) return;
-  try{
-    const ctx=getAudioContext(), now=ctx.currentTime;
-    for(let i=0;i<3;i++){
-      const osc=ctx.createOscillator();
-      const gain=ctx.createGain();
-      osc.connect(gain); gain.connect(ctx.destination);
-      osc.type="sine"; osc.frequency.value=880;
-      const start=now+i*0.3, end=start+0.15;
-      gain.gain.setValueAtTime(0,start);
-      gain.gain.linearRampToValueAtTime(0.5,start+0.02);
-      gain.gain.linearRampToValueAtTime(0,end);
-      osc.start(start); osc.stop(end+0.1);
-    }
-  } catch(e){ console.log("Audio error:",e);}
-}
-function requestNotificationPermission(){
-  if("Notification" in window && Notification.permission==="default") Notification.requestPermission();
-}
-function updateSoundButton(){
-  const btn=document.getElementById("soundToggle");
-  if(soundEnabled){ btn.innerHTML="🔔 เสียงแจ้งเตือน"; btn.classList.remove("muted"); }
-  else{ btn.innerHTML="🔕 ปิดเสียงแจ้งเตือน"; btn.classList.add("muted"); }
-}
-function toggleSound(){
-  soundEnabled=!soundEnabled;
-  localStorage.setItem("soundEnabled", soundEnabled);
-  updateSoundButton();
-  if(soundEnabled) playNotificationSound();
-}
 
-// ================= DOM =================
+
+// ================= UI =================
 const mapSel=document.getElementById("map");
 const chSel=document.getElementById("channel");
 const bossSel=document.getElementById("boss");
 const timersDiv=document.getElementById("timers");
+
+// ================= CONFIG =================
+
+const NORMAL_RESPAWN = { min: 20, max: 30 };
+
+const SPECIAL_RESPAWN = {
+  "จินโฮ": { min: 120, max: 180 }
+};
 
 // ================= รูปบอส =================
 
@@ -158,6 +131,7 @@ const BOSS_IMAGES = {
 
 
 };
+
 // ================= รูปแผนที่ =================
 
 const MAP_IMAGES={
@@ -184,10 +158,13 @@ const MAP_IMAGES={
 
   "กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
   "โทนวัง (อัพ10)":"images/map_tonwang.png",
-  "ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
-  "มิโนทอร์ (อัพ10)":"images/wayom.png",
+  "วายอม (อัพ10)":"images/map_wayom.png",
+  "มิโนทอร์":"images/wayom.png",
   "ห้องจินโฮ":"images/map_jinho.png"
 };
+
+// ================= DATA =================
+
 const BOSS_DATA = {
 
 
@@ -326,107 +303,76 @@ const BOSS_DATA = {
   }
 };
 
-
-
-// ================= CORE =================
+// ================= INIT =================
 function init(){
   for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
   updateChannels();
-  updateSoundButton();
-  requestNotificationPermission();
-  loadTimersFromLocalStorage();
-}
-function updateChannels(){chSel.innerHTML="";for(let c in BOSS_DATA[mapSel.value]) chSel.innerHTML+=`<option>${c}</option>`; updateBosses();}
-function updateBosses(){bossSel.innerHTML=""; BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);}
-mapSel.onchange=updateChannels; chSel.onchange=updateBosses;
 
-// ===== Timer functions =====
+  // 🔥 ดึงข้อมูล realtime
+  db.ref("bossTimers").on("value", snap=>{
+    timersData = snap.val() || {};
+    render();
+  });
+}
+
+function updateChannels(){
+  chSel.innerHTML="";
+  for(let c in BOSS_DATA[mapSel.value])
+    chSel.innerHTML+=`<option>${c}</option>`;
+  updateBosses();
+}
+function updateBosses(){
+  bossSel.innerHTML="";
+  BOSS_DATA[mapSel.value][chSel.value]
+    .forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
+}
+
+mapSel.onchange=updateChannels;
+chSel.onchange=updateBosses;
+
+// ================= ACTION =================
 function bossDead(){
   const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
   const now=Date.now();
-  const r=SPECIAL_RESPAWN[bossSel.value]||NORMAL_RESPAWN;
-  timersData[key]={ start: now, minTime: now+r.min*60000, maxTime: now+r.max*60000 };
-  localStorage.setItem(key, JSON.stringify(timersData[key]));
-  render();
-}
-function resetTimer(key){
-  const now=Date.now();
-  const boss=key.split("|")[2];
-  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
-  timersData[key]={ start: now, minTime: now+r.min*60000, maxTime: now+r.max*60000 };
-  localStorage.setItem(key, JSON.stringify(timersData[key]));
-  render();
-}
-function deleteTimer(key){
-  delete timersData[key]; localStorage.removeItem(key); notifiedTimers.delete(key); render();
-}
-function loadTimersFromLocalStorage(){
-  Object.keys(localStorage).forEach(k=>{
-    if(k.includes("|")) timersData[k]=JSON.parse(localStorage[k]);
-  });
+
+  const data={
+    start:now,
+    minTime:now+20*60000,
+    maxTime:now+30*60000
+  };
+
+  // 🔥 ส่งขึ้น Firebase
+  db.ref("bossTimers/"+key).set(data);
 }
 
-// ===== Notifications =====
-function checkSpawnNotifications(list){
-  const now=Date.now();
-  list.forEach(i=>{
-    const t=i.data; const key=i.key;
-    const isSpawning=now>=t.minTime && now<=t.maxTime;
-    if(isSpawning && !notifiedTimers.has(key)){
-      playNotificationSound();
-      notifiedTimers.add(key);
-      if(Notification.permission==="granted"){
-        const [map,ch,boss]=key.split("|");
-        new Notification("🐉 Boss กำลังจะเกิด!",{
-          body:`${boss} - ${map} (${ch})`,
-          icon:BOSS_IMAGES[boss],
-          tag:key
-        });
-      }
-    }
-    if(now>t.maxTime) notifiedTimers.delete(key);
-  });
+// ================= RENDER =================
+function fmt(ms){
+  const s=Math.floor(ms/1000);
+  const m=Math.floor(s/60);
+  return `${m}:${String(s%60).padStart(2,"0")}`;
 }
 
-// ===== Render =====
 function render(){
   timersDiv.innerHTML="";
   const now=Date.now();
-  const list=[];
-  Object.keys(timersData).forEach(k=>list.push({key:k,data:timersData[k]}));
-  list.sort((a,b)=>b.data.start-a.data.start);
-  checkSpawnNotifications(list);
-  list.forEach(i=>{
-    const [map,ch,boss]=i.key.split("|");
-    const t=i.data;
-    let status="⏳ ยังไม่ถึงเวลาเกิด", cardClass="card";
-    if(now>=t.minTime && now<=t.maxTime){ status="✅ อยู่ในช่วงเกิด"; cardClass="card pulse"; }
-    if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
+
+  Object.keys(timersData).forEach(k=>{
+    const t=timersData[k];
+    const [map,ch,boss]=k.split("|");
+
     timersDiv.innerHTML+=`
-<div class="${cardClass}">
-  <div class="img-box">
-    <img src="${BOSS_IMAGES[boss]}" class="boss-img">
-    <img src="${MAP_IMAGES[map]}" class="map-img">
-  </div>
-  <div class="info">
-    <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
-    <div class="time">⏱ จับเวลา ${fmt(now-t.start)}</div>
-   <div class="time spawn-time">
-🕒 ช่วงเกิด 
-${new Date(t.minTime).toLocaleTimeString('th-TH', {timeZone:'Asia/Bangkok'})} 
-- 
-${new Date(t.maxTime).toLocaleTimeString('th-TH', {timeZone:'Asia/Bangkok'})}
-</div>
-    <div class="window">${status}</div>
-    <button class="reset" onclick="resetTimer('${i.key}')">รีเซ็ตเวลา</button>
-    <button class="delete" onclick="deleteTimer('${i.key}')">ลบ</button>
-  </div>
-</div>`;
+    <div class="card">
+      <div class="info">
+        <b>${map} | ${ch} | ${boss}</b>
+        <div class="time">⏱ ${fmt(now-t.start)}</div>
+      </div>
+    </div>`;
   });
 }
 
 setInterval(render,1000);
 init();
 </script>
+
 </body>
 </html>
