@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Boss Timer</title>
-<link rel="icon" href="https://drive.google.com/thumbnail?id=1mNVtdSFCXznAZpZgdQ-Dbllr1Xa1fiUq">
 
 <style>
 html,body{
@@ -15,19 +14,11 @@ html,body{
   color:#fff;
   font-family:Arial;
 }
-h2{
-  color:#00ffd5;
-  display:flex;
-  align-items:center;
-  gap:12px;
-  padding:10px;
-}
-.logo{width:60px;height:60px}
+h2{color:#00ffd5;padding:10px;}
 select,button{
   padding:8px;margin:4px;border-radius:6px;border:none;
 }
-button{background:#00ffd5;font-weight:bold;cursor:pointer;}
-button.muted{opacity:0.5;background:#555;color:#ccc;}
+button{background:#00ffd5;cursor:pointer;}
 
 .card{
   display:flex;gap:14px;
@@ -38,34 +29,28 @@ button.muted{opacity:0.5;background:#555;color:#ccc;}
   border-left:4px solid #00ffd5;
 }
 .card.pulse{
-  animation:pulse 1s infinite;
   border-left-color:#ff4d4d;
+  animation:pulse 1s infinite;
 }
 @keyframes pulse{
-  50% { transform: scale(1.03); box-shadow: 0 0 20px rgba(255,77,77,0.7); }
+  50%{transform:scale(1.03);}
 }
-.img-box{display:flex;gap:8px;}
-.boss-img,.map-img{
-  width:140px;height:140px;
-  object-fit:cover;border-radius:8px;
+
+.img-box img{
+  width:120px;height:120px;
+  border-radius:8px;
 }
-.boss-img{border:2px solid #00ffd5;}
-.map-img{border:2px solid #ffaa00;}
-.info b{color:#00ffd5;}
+
 .time{color:#7CFF00;}
-.spawn-time{color:#ff4d4d;font-weight:bold;}
-.window{font-weight:bold;}
+.spawn{color:#ff4d4d;font-weight:bold;}
 </style>
 </head>
 
 <body>
 
-<h2>
-<img src="https://drive.google.com/thumbnail?id=1mNVtdSFCXznAZpZgdQ-Dbllr1Xa1fiUq" class="logo">
-⏱ Boss Timer DARK HELL
-</h2>
+<h2>⏱ Boss Timer DARK HELL</h2>
 
-<div style="padding:10px;">
+<div>
 <select id="map"></select>
 <select id="channel"></select>
 <select id="boss"></select>
@@ -74,7 +59,7 @@ button.muted{opacity:0.5;background:#555;color:#ccc;}
 
 <div id="timers"></div>
 
-<!-- 🔥 Firebase -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
@@ -83,7 +68,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
   authDomain: "bosstimer-22b86.firebaseapp.com",
   databaseURL: "https://bosstimer-22b86-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "bosstimer-22b86",
+  projectId: "bosstimer-22b86"
 };
 
 firebase.initializeApp(firebaseConfig);
@@ -97,11 +82,6 @@ const SPECIAL_RESPAWN = {
   "จินโฮ": { min: 120, max: 180 }
 };
 
-// ================= UI =================
-const mapSel=document.getElementById("map");
-const chSel=document.getElementById("channel");
-const bossSel=document.getElementById("boss");
-const timersDiv=document.getElementById("timers");
 
 // ================= รูปบอส =================
 
@@ -301,54 +281,76 @@ const BOSS_DATA = {
   }
 };
 
-// ================= INIT =================
+// ===== UI =====
+const mapSel=document.getElementById("map");
+const chSel=document.getElementById("channel");
+const bossSel=document.getElementById("boss");
+const timersDiv=document.getElementById("timers");
+
+let timersData={};
+
+// ===== INIT =====
 function init(){
-  for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
+  for(let m in BOSS_DATA){
+    mapSel.innerHTML+=`<option>${m}</option>`;
+  }
   updateChannels();
 
-  // 🔥 ดึงข้อมูล realtime
-  db.ref("bossTimers").on("value", snap=>{
-    timersData = snap.val() || {};
+  db.ref("bossTimers").on("value",snap=>{
+    timersData=snap.val()||{};
     render();
   });
 }
 
 function updateChannels(){
   chSel.innerHTML="";
-  for(let c in BOSS_DATA[mapSel.value])
+  for(let c in BOSS_DATA[mapSel.value]){
     chSel.innerHTML+=`<option>${c}</option>`;
-  updateBosses();
+  }
+  updateBoss();
 }
-function updateBosses(){
+function updateBoss(){
   bossSel.innerHTML="";
   BOSS_DATA[mapSel.value][chSel.value]
     .forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
 }
 
 mapSel.onchange=updateChannels;
-chSel.onchange=updateBosses;
+chSel.onchange=updateBoss;
 
-// ================= ACTION =================
+// ===== ACTION =====
 function bossDead(){
   const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
   const now=Date.now();
 
-  const data={
+  db.ref("bossTimers/"+key).set({
     start:now,
-    minTime:now+20*60000,
-    maxTime:now+30*60000
-  };
-
-  // 🔥 ส่งขึ้น Firebase
-  db.ref("bossTimers/"+key).set(data);
+    minTime:now+RESPAWN.min*60000,
+    maxTime:now+RESPAWN.max*60000
+  });
 }
 
-// ================= RENDER =================
+function resetTimer(key){
+  const now=Date.now();
+  db.ref("bossTimers/"+key).set({
+    start:now,
+    minTime:now+RESPAWN.min*60000,
+    maxTime:now+RESPAWN.max*60000
+  });
+}
+
+function deleteTimer(key){
+  db.ref("bossTimers/"+key).remove();
+}
+
+// ===== FORMAT =====
 function fmt(ms){
   const s=Math.floor(ms/1000);
   const m=Math.floor(s/60);
   return `${m}:${String(s%60).padStart(2,"0")}`;
 }
+
+// ===== RENDER =====
 function render(){
   timersDiv.innerHTML="";
   const now=Date.now();
@@ -357,16 +359,40 @@ function render(){
     const t=timersData[k];
     const [map,ch,boss]=k.split("|");
 
+    let status="⏳ ยังไม่เกิด";
+    let cls="card";
+
+    if(now>=t.minTime && now<=t.maxTime){
+      status="🔥 บอสกำลังเกิด";
+      cls="card pulse";
+    }
+    if(now>t.maxTime){
+      status="❌ หมดเวลาแล้ว";
+    }
+
     timersDiv.innerHTML+=`
-    <div class="card">
+    <div class="${cls}">
       <div class="img-box">
-        <img src="${BOSS_IMAGES[boss]}" class="boss-img">
-        <img src="${MAP_IMAGES[map]}" class="map-img">
+        <img src="${BOSS_IMAGES[boss]||''}">
+        <img src="${MAP_IMAGES[map]||''}">
       </div>
 
-      <div class="info">
+      <div>
         <b>${map} | ${ch} | ${boss}</b>
-        <div class="time">⏱ ${fmt(now-t.start)}</div>
+
+        <div class="time">
+          ⏱ เวลา: ${fmt(now-t.start)}
+        </div>
+
+        <div class="spawn">
+          🕒 ${new Date(t.minTime).toLocaleTimeString()} - 
+          ${new Date(t.maxTime).toLocaleTimeString()}
+        </div>
+
+        <div>${status}</div>
+
+        <button onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
+        <button onclick="deleteTimer('${k}')">ลบ</button>
       </div>
     </div>`;
   });
