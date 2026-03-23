@@ -352,26 +352,93 @@ function fmt(ms){
   return `${m}:${String(s%60).padStart(2,"0")}`;
 }
 
-function render(){
-  timersDiv.innerHTML="";
-  const now=Date.now();
 
-  Object.keys(timersData).forEach(k=>{
-    const t=timersData[k];
-    const [map,ch,boss]=k.split("|");
+function render(){
+
+  timersDiv.innerHTML="";
+
+  const now = Date.now();
+
+  const list=[];
+
+  Object.keys(localStorage).forEach(k=>{
+    if(k.includes("|")){
+      list.push({key:k,data:JSON.parse(localStorage[k])});
+    }
+  });
+
+  list.sort((a,b)=>b.data.start-a.data.start);
+
+  list.forEach(i=>{
+
+    const parts = i.key.split("|");
+    const map = parts[0];
+    const ch = parts[1];
+    const boss = parts[2];
+
+    const t=i.data;
+
+    let status="⏳ ยังไม่ถึงเวลาเกิด";
+
+    if(now>=t.minTime && now<=t.maxTime){
+      status="✅ อยู่ในช่วงเกิด";
+    }
+
+    if(now>t.maxTime){
+      status="⛔ ครบเวลาแล้ว";
+    }
 
     timersDiv.innerHTML+=`
+
     <div class="card">
-      <div class="info">
-        <b>${map} | ${ch} | ${boss}</b>
-        <div class="time">⏱ ${fmt(now-t.start)}</div>
+
+      <div class="img-box">
+
+        <img src="${BOSS_IMAGES[boss]}" class="boss-img">
+
+        <img src="${MAP_IMAGES[map]}" class="map-img">
+
       </div>
+
+      <div class="info">
+
+        <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+
+        <div class="time">
+        ⏱ จับเวลา ${fmt(now - t.start)}
+        </div>
+
+        <div class="time spawn-time">
+
+        🕒 ช่วงเกิด 
+        ${new Date(t.minTime).toLocaleTimeString()} 
+        - 
+        ${new Date(t.maxTime).toLocaleTimeString()}
+
+        </div>
+
+        <div class="window">${status}</div>
+
+        <button class="reset" onclick="resetTimer('${i.key}')">
+        รีเซ็ตเวลา
+        </button>
+
+        <button class="delete" onclick="deleteTimer('${i.key}')">
+        ลบ
+        </button>
+
+      </div>
+
     </div>`;
+
   });
+
 }
 
 setInterval(render,1000);
+
 init();
+
 </script>
 
 </body>
