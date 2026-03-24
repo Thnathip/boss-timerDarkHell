@@ -3,8 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Boss Timer</title>
-
-<!-- favicon -->
 <link rel="icon" type="image/png" href="images/logo.png">
 
 <style>
@@ -27,15 +25,19 @@ h2{
   height:60px;
 }
 
-select,button{
-  padding:8px;
+select,input,button{
+  padding:6px;
   margin:4px;
   border-radius:6px;
   border:none;
 }
 
+input{
+  width:120px;
+}
+
 button{
-  background:#00ffd5;
+  background:#ff0000;
   font-weight:bold;
   cursor:pointer;
 }
@@ -84,20 +86,23 @@ button{
   font-weight:bold;
 }
 
+.hunter {
+  color: #FFD700; /* สีเหลือง */
+  font-weight: bold;
+}
 .window{
   margin-top:4px;
   font-weight:bold;
 }
 
-/* แยกสีแต่ละแชแนล CH1-CH8 */
 .CH1{color:#00e5ff}
 .CH2{color:#7CFF00}
 .CH3{color:#FFD700}
 .CH4{color:#FF9800}
 .CH5{color:#FF5252}
-.CH6{color:#9C27B0}
-.CH7{color:#FF69B4}
-.CH8{color:#00FF00}
+.CH6{color:#FF00FF}
+.CH7{color:#00FF7F}
+.CH8{color:#FF4500}
 
 .delete{
   background:#ff4d4d;
@@ -110,6 +115,7 @@ button{
   color:#000;
   margin-top:6px;
 }
+
 </style>
 </head>
 
@@ -120,11 +126,13 @@ button{
 ⏱ Boss Timer DARK HELL
 </h2>
 
-<div>
-<select id="map"></select>
-<select id="channel"></select>
-<select id="boss"></select>
-<button onclick="bossDead()">บอสตาย</button>
+<!-- แถวเลือกแมพ, แชแนล, ผู้ล่า, บอส, ปุ่ม -->
+<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+  <select id="map"></select>
+  <select id="channel"></select>
+  <input type="text" id="hunterInput" placeholder="ใส่ชื่อผู้ล่า">
+  <select id="boss"></select>
+  <button onclick="bossDead()">บอสตาย</button>
 </div>
 
 <h3>รายการจับเวลา</h3>
@@ -190,8 +198,7 @@ const MAP_IMAGES={
   "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png",
   "กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
   "โทนวัง (อัพ10)":"images/map_tonwang.png",
-  "วายอม (อัพ10)":"images/map_wayom.png",
-  "มิโนทอร์":"images/wayom.png",
+  "ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
   "ห้องจินโฮ":"images/map_jinho.png"
 };
 
@@ -211,32 +218,12 @@ const BOSS_DATA = {
   "ภูเขาซุงซาน (อัพ8)": {"CH1":["เบี้ยสีม่วง"],"CH2":["เบี้ยสีม่วง"],"CH3":["เบี้ยสีม่วง"],"CH4":["เบี้ยสีม่วง"],"CH5":["เบี้ยสีม่วง"]},
   "ยอดเขาแทซาน (อัพ9)": {"CH1":["หัวหน้าซานซีน"],"CH2":["หัวหน้าซานซีน"],"CH3":["หัวหน้าซานซีน"],"CH4":["หัวหน้าซานซีน"],"CH5":["หัวหน้าซานซีน"]},
 
-  // === เฉพาะแมพ 5 ตัวนี้ให้ 8 แชแนล ===
-  "ทางเหนือของภูเขาแทซาน (อัพ9)": {
-    "CH1":["สมุนวานร"],"CH2":["สมุนวานร"],"CH3":["สมุนวานร"],
-    "CH4":["สมุนวานร"],"CH5":["สมุนวานร"],"CH6":["สมุนวานร"],
-    "CH7":["สมุนวานร"],"CH8":["สมุนวานร"]
-  },
-  "วัดเส้าหลิน (อัพ9)": {
-    "CH1":["นักบวชมูโฮน"],"CH2":["นักบวชมูโฮน"],"CH3":["นักบวชมูโฮน"],
-    "CH4":["นักบวชมูโฮน"],"CH5":["นักบวชมูโฮน"],"CH6":["นักบวชมูโฮน"],
-    "CH7":["นักบวชมูโฮน"],"CH8":["นักบวชมูโฮน"]
-  },
-  "กำแพงเมืองจีน (อัพ10)": {
-    "CH1":["จอมเวทย์ซุลซา"],"CH2":["จอมเวทย์ซุลซา"],"CH3":["จอมเวทย์ซุลซา"],
-    "CH4":["จอมเวทย์ซุลซา"],"CH5":["จอมเวทย์ซุลซา"],"CH6":["จอมเวทย์ซุลซา"],
-    "CH7":["จอมเวทย์ซุลซา"],"CH8":["จอมเวทย์ซุลซา"]
-  },
-  "โทนวัง (อัพ10)": {
-    "CH1":["พญาวัวอสูร"],"CH2":["พญาวัวอสูร"],"CH3":["พญาวัวอสูร"],
-    "CH4":["พญาวัวอสูร"],"CH5":["พญาวัวอสูร"],"CH6":["พญาวัวอสูร"],
-    "CH7":["พญาวัวอสูร"],"CH8":["พญาวัวอสูร"]
-  },
-  "ภูเขาวายอม (อัพ10)": {
-    "CH1":["มิโนทอร์"],"CH2":["มิโนทอร์"],"CH3":["มิโนทอร์"],
-    "CH4":["มิโนทอร์"],"CH5":["มิโนทอร์"],"CH6":["มิโนทอร์"],
-    "CH7":["มิโนทอร์"],"CH8":["มิโนทอร์"]
-  },
+  // แมพ 5 ตัวนี้ 8 แชแนล
+  "ทางเหนือของภูเขาแทซาน (อัพ9)": {"CH1":["สมุนวานร"],"CH2":["สมุนวานร"],"CH3":["สมุนวานร"],"CH4":["สมุนวานร"],"CH5":["สมุนวานร"],"CH6":["สมุนวานร"],"CH7":["สมุนวานร"],"CH8":["สมุนวานร"]},
+  "วัดเส้าหลิน (อัพ9)": {"CH1":["นักบวชมูโฮน"],"CH2":["นักบวชมูโฮน"],"CH3":["นักบวชมูโฮน"],"CH4":["นักบวชมูโฮน"],"CH5":["นักบวชมูโฮน"],"CH6":["นักบวชมูโฮน"],"CH7":["นักบวชมูโฮน"],"CH8":["นักบวชมูโฮน"]},
+  "กำแพงเมืองจีน (อัพ10)": {"CH1":["จอมเวทย์ซุลซา"],"CH2":["จอมเวทย์ซุลซา"],"CH3":["จอมเวทย์ซุลซา"],"CH4":["จอมเวทย์ซุลซา"],"CH5":["จอมเวทย์ซุลซา"],"CH6":["จอมเวทย์ซุลซา"],"CH7":["จอมเวทย์ซุลซา"],"CH8":["จอมเวทย์ซุลซา"]},
+  "โทนวัง (อัพ10)": {"CH1":["พญาวัวอสูร"],"CH2":["พญาวัวอสูร"],"CH3":["พญาวัวอสูร"],"CH4":["พญาวัวอสูร"],"CH5":["พญาวัวอสูร"],"CH6":["พญาวัวอสูร"],"CH7":["พญาวัวอสูร"],"CH8":["พญาวัวอสูร"]},
+  "ภูเขาวายอม (อัพ10)": {"CH1":["มิโนทอร์"],"CH2":["มิโนทอร์"],"CH3":["มิโนทอร์"],"CH4":["มิโนทอร์"],"CH5":["มิโนทอร์"],"CH6":["มิโนทอร์"],"CH7":["มิโนทอร์"],"CH8":["มิโนทอร์"]},
 
   "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
 };
@@ -245,6 +232,7 @@ const BOSS_DATA = {
 const mapSel=document.getElementById("map");
 const chSel=document.getElementById("channel");
 const bossSel=document.getElementById("boss");
+const hunterInput=document.getElementById("hunterInput");
 const timersDiv=document.getElementById("timers");
 let timersData={};
 
@@ -263,22 +251,55 @@ function updateChannels(){
   chSel.innerHTML="";
   for(let c in BOSS_DATA[mapSel.value]) chSel.innerHTML+=`<option>${c}</option>`;
   updateBosses();
+  setTimeout(()=>hunterInput.focus(),10);
 }
 
 function updateBosses(){
   bossSel.innerHTML="";
   BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
+  setTimeout(()=>hunterInput.focus(),10);
 }
 
-mapSel.onchange=updateChannels;
-chSel.onchange=updateBosses;
+mapSel.onchange = updateChannels;
+chSel.onchange = updateBosses;
 
 // ================= ACTION =================
+// ลบ event listener เก่าที่บันทึกทุกครั้ง
+// hunterInput.addEventListener("input", updateHunterInput);
+
+// bossDead() บันทึก hunter ไปพร้อมกับเวลาบอส
 function bossDead(){
+  const hunterName = hunterInput.value.trim();
+  if(!hunterName){ 
+    alert("กรุณาใส่ชื่อผู้ล่าก่อนจดเวลา!");
+    hunterInput.focus();
+    return;
+  }
+
   const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
   const now=Date.now();
   const r=SPECIAL_RESPAWN[bossSel.value]||NORMAL_RESPAWN;
-  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000});
+
+  db.ref("bossTimers/"+key).set({
+    start: now,
+    minTime: now + r.min*60000,
+    maxTime: now + r.max*60000,
+    hunter: hunterName
+  });
+}
+
+// resetTimer() ก็บันทึกชื่อเดิมของ hunter ด้วย
+function resetTimer(key){
+  const parts=key.split("|");
+  const boss=parts[2];
+  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
+  const now=Date.now();
+  db.ref("bossTimers/"+key).set({
+    start: now,
+    minTime: now + r.min*60000,
+    maxTime: now + r.max*60000,
+    hunter: timersData[key]?.hunter || ""
+  });
 }
 
 function resetTimer(key){
@@ -286,12 +307,18 @@ function resetTimer(key){
   const boss=parts[2];
   const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
   const now=Date.now();
-  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000});
+  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000,hunter:timersData[key]?.hunter||""});
 }
 
 function deleteTimer(key){
   db.ref("bossTimers/"+key).remove();
 }
+
+function updateHunterInput(){
+  const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
+  db.ref("bossTimers/"+key+"/hunter").set(hunterInput.value.trim());
+}
+hunterInput.addEventListener("input", updateHunterInput);
 
 function fmt(ms){
   const s=Math.floor(ms/1000);
@@ -312,7 +339,11 @@ function render(){
   });
 
   sortedKeys.forEach(k=>{
-    const t=timersData[k];
+    const t = timersData[k];
+
+    // ถ้า start ไม่มี (ยังไม่กดบอสตาย) ให้ข้าม
+    if(!t.start) return;
+
     const [map,ch,boss]=k.split("|");
     let status="⏳ ยังไม่เกิด";
     if(now>=t.minTime&&now<=t.maxTime) status="✅ อยู่ในช่วงเกิด";
@@ -328,6 +359,7 @@ function render(){
         <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
         <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
         <div class="time spawn-time">🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}</div>
+        <div class="time">🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span></div>
         <div class="window">${status}</div>
         <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
         <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
@@ -339,6 +371,5 @@ function render(){
 setInterval(render,1000);
 init();
 </script>
-
 </body>
 </html>
