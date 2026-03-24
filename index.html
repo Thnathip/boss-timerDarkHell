@@ -263,11 +263,8 @@ function updateBosses(){
 mapSel.onchange = updateChannels;
 chSel.onchange = updateBosses;
 
-// ================= ACTION =================
-// ลบ event listener เก่าที่บันทึกทุกครั้ง
-// hunterInput.addEventListener("input", updateHunterInput);
 
-// bossDead() บันทึก hunter ไปพร้อมกับเวลาบอส
+// ================= ACTION =================
 function bossDead(){
   const hunterName = hunterInput.value.trim();
   if(!hunterName){ 
@@ -288,6 +285,25 @@ function bossDead(){
   });
 }
 
+// ฟังก์ชันแก้ไขชื่อผู้ล่า
+function editHunter(key){
+  const t = timersData[key];
+  if(!t) return;
+  const newName = prompt("แก้ไขชื่อผู้ล่า:", t.hunter || "");
+  if(newName !== null){
+    db.ref("bossTimers/"+key+"/hunter").set(newName.trim());
+  }
+}
+
+// ฟังก์ชันแก้ไขชื่อผู้ล่า
+function editHunter(key){
+  const t = timersData[key];
+  if(!t) return;
+  const newName = prompt("แก้ไขชื่อผู้ล่า:", t.hunter || "");
+  if(newName !== null){
+    db.ref("bossTimers/"+key+"/hunter").set(newName.trim());
+  }
+}
 // resetTimer() ก็บันทึกชื่อเดิมของ hunter ด้วย
 function resetTimer(key){
   const parts=key.split("|");
@@ -348,23 +364,23 @@ function render(){
     let status="⏳ ยังไม่เกิด";
     if(now>=t.minTime&&now<=t.maxTime) status="✅ อยู่ในช่วงเกิด";
     if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
-
-    timersDiv.innerHTML+=`
-    <div class="card">
-      <div class="img-box">
-        <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
-        <img src="${MAP_IMAGES[map]||''}" class="map-img">
-      </div>
-      <div class="info">
-        <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
-        <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
-        <div class="time spawn-time">🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}</div>
-        <div class="time">🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span></div>
-        <div class="window">${status}</div>
-        <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
-        <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
-      </div>
-    </div>`;
+timersDiv.innerHTML+=`
+<div class="card">
+  <div class="img-box">
+    <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
+    <img src="${MAP_IMAGES[map]||''}" class="map-img">
+  </div>
+  <div class="info">
+    <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+    <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
+    <div class="time spawn-time">🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}</div>
+    <div class="time">🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span></div>
+    <div class="window">${status}</div>
+    <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
+    <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
+    <button class="reset" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
+  </div>
+</div>`;
   });
 }
 
