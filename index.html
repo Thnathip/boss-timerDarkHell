@@ -329,6 +329,13 @@ function bossDead(){
     hunter: hunterName
   });
 }
+function editHunter(key){
+  const currentName = timersData[key]?.hunter || "";
+  const newName = prompt("แก้ไขชื่อผู้ล่า:", currentName);
+  if(newName !== null){ // ถ้าไม่กดยกเลิก
+    db.ref("bossTimers/"+key).update({hunter: newName.trim()});
+  }
+}
 
 function resetTimer(key){
   const parts=key.split("|");
@@ -383,9 +390,9 @@ function render(){
       🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span>
     </div>
     <div class="window">${now>=t.minTime&&now<=t.maxTime?"✅ อยู่ในช่วงเกิด":now>t.maxTime?"⛔ ครบเวลาแล้ว":"⏳ ยังไม่เกิด"}</div>
-    <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
-    <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
-    <button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
+<button class="reset" onclick="if(confirm('คุณต้องการรีเซ็ตเวลานี้หรือไม่?')) resetTimer('${k}')">รีเซ็ตเวลา</button>
+<button class="delete" onclick="if(confirm('คุณต้องการลบเวลานี้หรือไม่?')) deleteTimer('${k}')">ลบ</button>
+<button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
   </div>
 </div>`;
   });
