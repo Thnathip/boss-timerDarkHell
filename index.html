@@ -172,10 +172,7 @@ button{
   cursor: pointer;
   padding: 4px 6px;
 }
-#boss {
-  pointer-events: none;  /* ปิดการคลิกทั้งหมด */
-  opacity: 0;            /* ซ่อน element */
-}
+
 </style>
 </head>
 
@@ -320,9 +317,10 @@ function bossDead(){
   const hunterName = hunterInput.value.trim();
   if(!hunterName){ alert("กรุณาใส่ชื่อผู้ล่า!"); return; }
 
-  const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
+  const boss = BOSS_DATA[mapSel.value][chSel.value][0]; // บอสตัวแรก
+  const key=`${mapSel.value}|${chSel.value}|${boss}`;
   const now=Date.now();
-  const r=SPECIAL_RESPAWN[bossSel.value]||NORMAL_RESPAWN;
+  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
 
   db.ref("bossTimers/"+key).set({
     start: now,
