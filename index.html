@@ -87,7 +87,7 @@ button{
 }
 
 .hunter {
-  color: #FFD700; /* สีเหลือง */
+  color: #FFD700;
   font-weight: bold;
 }
 .window{
@@ -115,7 +115,46 @@ button{
   color:#000;
   margin-top:6px;
 }
+#boss {
+  background: transparent;  /* โปร่งใส */
+  border: none;             /* ลบเส้นกรอบ */
+  appearance: none;         /* ลบลูกศรพื้นฐาน */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  color: #fff;              /* สีข้อความ */
+  cursor: pointer;
+  padding: 4px 6px;
+}
+#boss {
+  pointer-events: none;  /* ปิดการคลิกทั้งหมด */
+  opacity: 0;            /* ซ่อน element */
+}
+.reset{
+  background:#ffaa00; /* สีเหลือง */
+  color:#fff;
+  margin-top:6px;
+}
 
+.edit{
+  background:#00aaff; /* สีฟ้าอ่อน */
+  color:#fff;
+  margin-top:6px;
+}
+.boss-dead {
+  background:#ff4d4d; /* สีแดง */
+  color:#fff;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-left:4px;
+  transition: transform 0.1s;
+}
+
+.boss-dead:hover {
+  transform: scale(1.05);
+}
 </style>
 </head>
 
@@ -126,24 +165,24 @@ button{
 ⏱ Boss Timer DARK HELL
 </h2>
 
-<!-- แถวเลือกแมพ, แชแนล, ผู้ล่า, บอส, ปุ่ม -->
 <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
   <select id="map"></select>
   <select id="channel"></select>
   <input type="text" id="hunterInput" placeholder="ใส่ชื่อผู้ล่า">
   <select id="boss"></select>
-  <button onclick="bossDead()">บอสตาย</button>
+  <button class="boss-dead" onclick="bossDead()">บอสตาย</button>
 </div>
+
+<!-- 🔍 เพิ่มช่องค้นหา -->
+<input type="text" id="searchInput" placeholder="🔍 ค้นหาแมพ / บอส..." style="width:250px;">
 
 <h3>รายการจับเวลา</h3>
 <div id="timers"></div>
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
 <script>
-// ================= CONFIG =================
 const firebaseConfig = {
   apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
   authDomain: "bosstimer-22b86.firebaseapp.com",
@@ -156,53 +195,29 @@ const db = firebase.database();
 const NORMAL_RESPAWN = { min: 20, max: 30 };
 const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
 
-// ================= รูปบอส =================
 const BOSS_IMAGES = {
-  "หัวหน้าลามะชั่ว":"images/1.png",
-  "โฮนโดนยักษ์":"images/2.png",
-  "อสูรไร้หัว":"images/3.png",
-  "ยอยอวา":"images/4.png",
-  "ผีปังตอยักษ์":"images/5.png",
-  "ต้นไม้ปีศาจหมื่นปี":"images/6.png",
-  "ราชามาโบก":"images/7.png",
-  "พญาเต่าจอมตะกล":"images/15.png",
-  "ปีศาจแสงจันทร์":"images/17.png",
-  "ยักษ์หินคึมกัง":"images/8.png",
-  "ราชาอินโฮ":"images/9.png",
-  "เบี้ยสีม่วง":"images/10.png",
-  "หัวหน้าซานซีน":"images/11.png",
-  "สมุนวานร":"images/12.png",
-  "นักบวชมูโฮน":"images/13.png",
-  "จอมเวทย์ซุลซา":"images/14.png",
-  "พญาวัวอสูร":"images/16.png",
-  "มิโนทอร์":"images/18.png",
+  "หัวหน้าลามะชั่ว":"images/1.png","โฮนโดนยักษ์":"images/2.png","อสูรไร้หัว":"images/3.png",
+  "ยอยอวา":"images/4.png","ผีปังตอยักษ์":"images/5.png","ต้นไม้ปีศาจหมื่นปี":"images/6.png",
+  "ราชามาโบก":"images/7.png","พญาเต่าจอมตะกล":"images/15.png","ปีศาจแสงจันทร์":"images/17.png",
+  "ยักษ์หินคึมกัง":"images/8.png","ราชาอินโฮ":"images/9.png","เบี้ยสีม่วง":"images/10.png",
+  "หัวหน้าซานซีน":"images/11.png","สมุนวานร":"images/12.png","นักบวชมูโฮน":"images/13.png",
+  "จอมเวทย์ซุลซา":"images/14.png","พญาวัวอสูร":"images/16.png","มิโนทอร์":"images/18.png",
   "จินโฮ":"images/40.png"
 };
 
-// ================= แผนที่ =================
 const MAP_IMAGES={
-  "ทับอีชา (อัพ4)":"images/map_tabicha.png",
-  "วาชองจี (อัพ4)":"images/map_wachongji.png",
-  "สุสานจักรพรรดิ์ (อัพ5)":"images/map_tomb.png",
-  "ชองจู (อัพ5)":"images/map_cheongju.png",
-  "แม่น้ำวังฮา (อัพ6)":"images/map_river.png",
-  "ทางเข้าถ้ำหินโยงมุน (อัพ6)":"images/map_yongmun.png",
-  "ทางเข้าถ้ำมักโก (อัพ7)":"images/map_makgo.png",
-  "ทะเลสาบโทซอง (อัพ7)":"images/map_lake.png",
-  "ถ้ำมักโกชั่นที่2 (อัพ7)":"images/map_makgo2.png",
-  "บริเวณแม่น้ำวังฮา (อัพ8)":"images/map_river2.png",
-  "ภูเขาแทซานใต้ (อัพ8)":"images/map_taesan_s.png",
-  "ภูเขาซุงซาน (อัพ8)":"images/map_sungsan.png",
-  "ยอดเขาแทซาน (อัพ9)":"images/map_taesan_top.png",
-  "ทางเหนือของภูเขาแทซาน (อัพ9)":"images/map_taesan_n.png",
-  "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png",
-  "กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
-  "โทนวัง (อัพ10)":"images/map_tonwang.png",
-  "ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
+  "ทับอีชา (อัพ4)":"images/map_tabicha.png","วาชองจี (อัพ4)":"images/map_wachongji.png",
+  "สุสานจักรพรรดิ์ (อัพ5)":"images/map_tomb.png","ชองจู (อัพ5)":"images/map_cheongju.png",
+  "แม่น้ำวังฮา (อัพ6)":"images/map_river.png","ทางเข้าถ้ำหินโยงมุน (อัพ6)":"images/map_yongmun.png",
+  "ทางเข้าถ้ำมักโก (อัพ7)":"images/map_makgo.png","ทะเลสาบโทซอง (อัพ7)":"images/map_lake.png",
+  "ถ้ำมักโกชั่นที่2 (อัพ7)":"images/map_makgo2.png","บริเวณแม่น้ำวังฮา (อัพ8)":"images/map_river2.png",
+  "ภูเขาแทซานใต้ (อัพ8)":"images/map_taesan_s.png","ภูเขาซุงซาน (อัพ8)":"images/map_sungsan.png",
+  "ยอดเขาแทซาน (อัพ9)":"images/map_taesan_top.png","ทางเหนือของภูเขาแทซาน (อัพ9)":"images/map_taesan_n.png",
+  "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png","กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
+  "โทนวัง (อัพ10)":"images/map_tonwang.png","ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
   "ห้องจินโฮ":"images/map_jinho.png"
 };
 
-// ================= DATA =================
 const BOSS_DATA = {
   "ทับอีชา (อัพ4)": {"CH1":["หัวหน้าลามะชั่ว"],"CH2":["หัวหน้าลามะชั่ว"],"CH3":["หัวหน้าลามะชั่ว"],"CH4":["หัวหน้าลามะชั่ว"],"CH5":["หัวหน้าลามะชั่ว"]},
   "วาชองจี (อัพ4)": {"CH1":["โฮนโดนยักษ์"],"CH2":["โฮนโดนยักษ์"],"CH3":["โฮนโดนยักษ์"],"CH4":["โฮนโดนยักษ์"],"CH5":["โฮนโดนยักษ์"]},
@@ -228,15 +243,15 @@ const BOSS_DATA = {
   "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
 };
 
-// ================= UI =================
+
 const mapSel=document.getElementById("map");
 const chSel=document.getElementById("channel");
 const bossSel=document.getElementById("boss");
 const hunterInput=document.getElementById("hunterInput");
 const timersDiv=document.getElementById("timers");
+const searchInput=document.getElementById("searchInput"); // ✅ เพิ่ม
 let timersData={};
 
-// ================= INIT =================
 function init(){
   for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
   updateChannels();
@@ -248,9 +263,9 @@ function init(){
 }
 
 function updateChannels(){
-  chSel.innerHTML = `<option value="">-- เลือก CH ก่อน --</option>`;
-
   const currentMap = mapSel.value;
+
+  chSel.innerHTML = ""; // เคลียร์ก่อน
 
   for(let c in BOSS_DATA[currentMap]){
 
@@ -259,16 +274,18 @@ function updateChannels(){
       return map === currentMap && ch === c;
     });
 
+    const opt = document.createElement("option");
+    opt.value = c;
+    opt.textContent = hasActive ? `${c} [กำลังจับเวลา]` : c;
+
     if(hasActive){
-      chSel.innerHTML += `<option value="${c}" style="color:#00ff00;">
-        ${c} [กำลังจับเวลา]
-      </option>`;
-    }else{
-      chSel.innerHTML += `<option value="${c}">${c}</option>`;
+      opt.style.color = "#00ff00";
     }
+
+    chSel.appendChild(opt);
   }
 
-  bossSel.innerHTML = `<option>-- เลือก CH ก่อน --</option>`;
+  // bossSel.innerHTML = `<option>-- เลือก CH ก่อน --</option>`; <-- ลบทิ้ง
 }
 function updateBosses(){
   bossSel.innerHTML="";
@@ -279,15 +296,9 @@ function updateBosses(){
 mapSel.onchange = updateChannels;
 chSel.onchange = updateBosses;
 
-
-// ================= ACTION =================
 function bossDead(){
   const hunterName = hunterInput.value.trim();
-  if(!hunterName){ 
-    alert("กรุณาใส่ชื่อผู้ล่าก่อนจดเวลา!");
-    hunterInput.focus();
-    return;
-  }
+  if(!hunterName){ alert("กรุณาใส่ชื่อผู้ล่า!"); return; }
 
   const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
   const now=Date.now();
@@ -298,39 +309,6 @@ function bossDead(){
     minTime: now + r.min*60000,
     maxTime: now + r.max*60000,
     hunter: hunterName
-  });
-}
-
-// ฟังก์ชันแก้ไขชื่อผู้ล่า
-function editHunter(key){
-  const t = timersData[key];
-  if(!t) return;
-  const newName = prompt("แก้ไขชื่อผู้ล่า:", t.hunter || "");
-  if(newName !== null){
-    db.ref("bossTimers/"+key+"/hunter").set(newName.trim());
-  }
-}
-
-// ฟังก์ชันแก้ไขชื่อผู้ล่า
-function editHunter(key){
-  const t = timersData[key];
-  if(!t) return;
-  const newName = prompt("แก้ไขชื่อผู้ล่า:", t.hunter || "");
-  if(newName !== null){
-    db.ref("bossTimers/"+key+"/hunter").set(newName.trim());
-  }
-}
-// resetTimer() ก็บันทึกชื่อเดิมของ hunter ด้วย
-function resetTimer(key){
-  const parts=key.split("|");
-  const boss=parts[2];
-  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
-  const now=Date.now();
-  db.ref("bossTimers/"+key).set({
-    start: now,
-    minTime: now + r.min*60000,
-    maxTime: now + r.max*60000,
-    hunter: timersData[key]?.hunter || ""
   });
 }
 
@@ -346,41 +324,32 @@ function deleteTimer(key){
   db.ref("bossTimers/"+key).remove();
 }
 
-function updateHunterInput(){
-  const key=`${mapSel.value}|${chSel.value}|${bossSel.value}`;
-  db.ref("bossTimers/"+key+"/hunter").set(hunterInput.value.trim());
-}
-hunterInput.addEventListener("input", updateHunterInput);
-
 function fmt(ms){
   const s=Math.floor(ms/1000);
   const m=Math.floor(s/60);
-  const h=Math.floor(m/60);
-  return h>0
-    ? `${h}:${String(m%60).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`
-    : `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  return `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
 }
 
-// ================= RENDER =================
 function render(){
   timersDiv.innerHTML="";
   const now=Date.now();
+  const keyword = searchInput.value.toLowerCase();
 
-  const sortedKeys = Object.keys(timersData).sort((a,b)=>{
-    return timersData[b].start - timersData[a].start;
-  });
-
-  sortedKeys.forEach(k=>{
+  Object.keys(timersData).sort((a,b)=>timersData[b].start - timersData[a].start)
+  .forEach(k=>{
     const t = timersData[k];
-
-    // ถ้า start ไม่มี (ยังไม่กดบอสตาย) ให้ข้าม
     if(!t.start) return;
 
     const [map,ch,boss]=k.split("|");
+
+    // 🔍 filter
+    if(keyword && !map.toLowerCase().includes(keyword) && !boss.toLowerCase().includes(keyword)) return;
+
     let status="⏳ ยังไม่เกิด";
     if(now>=t.minTime&&now<=t.maxTime) status="✅ อยู่ในช่วงเกิด";
     if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
-timersDiv.innerHTML+=`
+
+    timersDiv.innerHTML+=`
 <div class="card">
   <div class="img-box">
     <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
@@ -388,17 +357,30 @@ timersDiv.innerHTML+=`
   </div>
   <div class="info">
     <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+
+    <!-- ✅ กลับมาเหมือนเดิม -->
     <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
-    <div class="time spawn-time">🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}</div>
-    <div class="time">🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span></div>
+
+    <div class="time spawn-time">
+      🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}
+    </div>
+
+    <!-- ✅ กลับมาเหมือนเดิม -->
+    <div class="time">
+      🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span>
+    </div>
+
     <div class="window">${status}</div>
-    <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
-    <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
-    <button class="reset" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
+
+<button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
+<button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
+<button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
   </div>
 </div>`;
   });
 }
+
+searchInput.addEventListener("input", render);
 
 setInterval(render,1000);
 init();
