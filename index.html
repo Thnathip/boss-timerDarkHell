@@ -26,14 +26,15 @@ h2{
 }
 
 select,input,button{
-  padding:6px;
+  padding:8px;
   margin:4px;
   border-radius:6px;
   border:none;
+  font-size:16px;
 }
 
 input{
-  width:120px;
+  width:180px;
 }
 
 button{
@@ -112,8 +113,54 @@ button{
 
 .reset{
   background:#ffaa00;
-  color:#000;
+  color:#fff;
   margin-top:6px;
+}
+
+.edit{
+  background:#00aaff;
+  color:#fff;
+  margin-top:6px;
+}
+
+.boss-dead {
+  background:#ff4d4d;
+  color:#fff;
+  padding:6px 12px;
+  border:none;
+  border-radius:6px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-left:4px;
+  transition: transform 0.1s;
+}
+
+.boss-dead:hover {
+  transform: scale(1.05);
+}
+
+/* ปุ่มค้นหา */
+#scrollBtn{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #27f108;
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+#searchInput{
+  width:250px;
+  padding:8px;
+  margin:4px;
+  border-radius:6px;
+  border:none;
+  font-size:16px;
 }
 #boss {
   background: transparent;  /* โปร่งใส */
@@ -128,32 +175,6 @@ button{
 #boss {
   pointer-events: none;  /* ปิดการคลิกทั้งหมด */
   opacity: 0;            /* ซ่อน element */
-}
-.reset{
-  background:#ffaa00; /* สีเหลือง */
-  color:#fff;
-  margin-top:6px;
-}
-
-.edit{
-  background:#00aaff; /* สีฟ้าอ่อน */
-  color:#fff;
-  margin-top:6px;
-}
-.boss-dead {
-  background:#ff4d4d; /* สีแดง */
-  color:#fff;
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-  margin-left:4px;
-  transition: transform 0.1s;
-}
-
-.boss-dead:hover {
-  transform: scale(1.05);
 }
 </style>
 </head>
@@ -173,11 +194,14 @@ button{
   <button class="boss-dead" onclick="bossDead()">บอสตาย</button>
 </div>
 
-<!-- 🔍 เพิ่มช่องค้นหา -->
-<input type="text" id="searchInput" placeholder="🔍 ค้นหาแมพ / บอส..." style="width:250px;">
+<!-- 🔍 ช่องค้นหา -->
+<input type="text" id="searchInput" placeholder="🔍 ค้นหาแมพ / บอส...">
 
 <h3>รายการจับเวลา</h3>
 <div id="timers"></div>
+
+<!-- ปุ่มเลื่อนขึ้นช่องผู้ล่า -->
+<button id="scrollBtn" onclick="scrollToHunter()">🔝 ไปยังช่องผู้ล่า</button>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
@@ -218,6 +242,7 @@ const MAP_IMAGES={
   "ห้องจินโฮ":"images/map_jinho.png"
 };
 
+// BOSS_DATA แบบเต็มตามเดิม
 const BOSS_DATA = {
   "ทับอีชา (อัพ4)": {"CH1":["หัวหน้าลามะชั่ว"],"CH2":["หัวหน้าลามะชั่ว"],"CH3":["หัวหน้าลามะชั่ว"],"CH4":["หัวหน้าลามะชั่ว"],"CH5":["หัวหน้าลามะชั่ว"]},
   "วาชองจี (อัพ4)": {"CH1":["โฮนโดนยักษ์"],"CH2":["โฮนโดนยักษ์"],"CH3":["โฮนโดนยักษ์"],"CH4":["โฮนโดนยักษ์"],"CH5":["โฮนโดนยักษ์"]},
@@ -243,13 +268,14 @@ const BOSS_DATA = {
   "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
 };
 
-
+// 🔹 Elements
 const mapSel=document.getElementById("map");
 const chSel=document.getElementById("channel");
 const bossSel=document.getElementById("boss");
 const hunterInput=document.getElementById("hunterInput");
 const timersDiv=document.getElementById("timers");
-const searchInput=document.getElementById("searchInput"); // ✅ เพิ่ม
+const searchInput=document.getElementById("searchInput");
+
 let timersData={};
 
 function init(){
@@ -264,11 +290,9 @@ function init(){
 
 function updateChannels(){
   const currentMap = mapSel.value;
-
-  chSel.innerHTML = ""; // เคลียร์ก่อน
+  chSel.innerHTML = "";
 
   for(let c in BOSS_DATA[currentMap]){
-
     const hasActive = Object.keys(timersData).some(key=>{
       const [map,ch] = key.split("|");
       return map === currentMap && ch === c;
@@ -277,16 +301,12 @@ function updateChannels(){
     const opt = document.createElement("option");
     opt.value = c;
     opt.textContent = hasActive ? `${c} [กำลังจับเวลา]` : c;
-
-    if(hasActive){
-      opt.style.color = "#00ff00";
-    }
+    if(hasActive) opt.style.color = "#00ff00";
 
     chSel.appendChild(opt);
   }
-
-  // bossSel.innerHTML = `<option>-- เลือก CH ก่อน --</option>`; <-- ลบทิ้ง
 }
+
 function updateBosses(){
   bossSel.innerHTML="";
   BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
@@ -317,7 +337,12 @@ function resetTimer(key){
   const boss=parts[2];
   const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
   const now=Date.now();
-  db.ref("bossTimers/"+key).set({start:now,minTime:now+r.min*60000,maxTime:now+r.max*60000,hunter:timersData[key]?.hunter||""});
+  db.ref("bossTimers/"+key).set({
+    start:now,
+    minTime:now+r.min*60000,
+    maxTime:now+r.max*60000,
+    hunter:timersData[key]?.hunter||""
+  });
 }
 
 function deleteTimer(key){
@@ -339,15 +364,10 @@ function render(){
   .forEach(k=>{
     const t = timersData[k];
     if(!t.start) return;
-
     const [map,ch,boss]=k.split("|");
 
-    // 🔍 filter
+    // filter
     if(keyword && !map.toLowerCase().includes(keyword) && !boss.toLowerCase().includes(keyword)) return;
-
-    let status="⏳ ยังไม่เกิด";
-    if(now>=t.minTime&&now<=t.maxTime) status="✅ อยู่ในช่วงเกิด";
-    if(now>t.maxTime) status="⛔ ครบเวลาแล้ว";
 
     timersDiv.innerHTML+=`
 <div class="card">
@@ -357,24 +377,17 @@ function render(){
   </div>
   <div class="info">
     <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
-
-    <!-- ✅ กลับมาเหมือนเดิม -->
     <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
-
     <div class="time spawn-time">
       🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}
     </div>
-
-    <!-- ✅ กลับมาเหมือนเดิม -->
     <div class="time">
       🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span>
     </div>
-
-    <div class="window">${status}</div>
-
-<button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
-<button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
-<button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
+    <div class="window">${now>=t.minTime&&now<=t.maxTime?"✅ อยู่ในช่วงเกิด":now>t.maxTime?"⛔ ครบเวลาแล้ว":"⏳ ยังไม่เกิด"}</div>
+    <button class="reset" onclick="resetTimer('${k}')">รีเซ็ตเวลา</button>
+    <button class="delete" onclick="deleteTimer('${k}')">ลบ</button>
+    <button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
   </div>
 </div>`;
   });
@@ -382,7 +395,15 @@ function render(){
 
 searchInput.addEventListener("input", render);
 
+// 🔹 ปุ่มเลื่อนขึ้นช่องผู้ล่า
+function scrollToHunter(){
+  hunterInput.scrollIntoView({behavior:"smooth",block:"center"});
+  hunterInput.focus();
+}
+
+// 🔹 อัปเดต render ทุกวินาที
 setInterval(render,1000);
+
 init();
 </script>
 </body>
