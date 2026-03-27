@@ -240,20 +240,36 @@ let timersData={};
 function init(){
   for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
   updateChannels();
+
   db.ref("bossTimers").on("value",snap=>{
     timersData=snap.val()||{};
     render();
   });
 }
 
-// ================= CHANNEL & BOSS =================
 function updateChannels(){
-  chSel.innerHTML="";
-  for(let c in BOSS_DATA[mapSel.value]) chSel.innerHTML+=`<option>${c}</option>`;
-  updateBosses();
-  setTimeout(()=>hunterInput.focus(),10);
-}
+  chSel.innerHTML = `<option value="">-- เลือก CH ก่อน --</option>`;
 
+  const currentMap = mapSel.value;
+
+  for(let c in BOSS_DATA[currentMap]){
+
+    const hasActive = Object.keys(timersData).some(key=>{
+      const [map,ch] = key.split("|");
+      return map === currentMap && ch === c;
+    });
+
+    if(hasActive){
+      chSel.innerHTML += `<option value="${c}" style="color:#00ff00;">
+        ${c} [กำลังจับเวลา]
+      </option>`;
+    }else{
+      chSel.innerHTML += `<option value="${c}">${c}</option>`;
+    }
+  }
+
+  bossSel.innerHTML = `<option>-- เลือก CH ก่อน --</option>`;
+}
 function updateBosses(){
   bossSel.innerHTML="";
   BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
