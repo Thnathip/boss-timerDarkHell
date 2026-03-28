@@ -1,415 +1,425 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8">
-<title>Boss Timer</title>
-<link rel="icon" type="image/png" href="images/logo.png">
+  <!DOCTYPE html>
+  <html lang="th">
+  <head>
+  <meta charset="UTF-8">
+  <title>Boss Timer</title>
+  <link rel="icon" type="image/png" href="images/logo.png">
 
-<style>
-body{
-  font-family: Arial;
-  background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-  color:#fff;
-  padding:20px;
-}
+  <style>
+  body{
+    font-family: Arial;
+    background: linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+    color:#fff;
+    padding:20px;
+  }
 
-h2{
-  color:#00ffd5;
-  display:flex;
-  align-items:center;
-  gap:12px;
-}
+  h2{
+    color:#00ffd5;
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
 
-.logo{
-  width:60px;
-  height:60px;
-}
+  .logo{
+    width:60px;
+    height:60px;
+  }
 
-select,input,button{
-  padding:8px;
-  margin:4px;
-  border-radius:6px;
-  border:none;
-  font-size:16px;
-}
+  select,input,button{
+    padding:8px;
+    margin:4px;
+    border-radius:6px;
+    border:none;
+    font-size:16px;
+  }
 
-input{
-  width:180px;
-}
+  input{
+    width:180px;
+  }
 
-button{
-  background:#ff0000;
-  font-weight:bold;
-  cursor:pointer;
-}
+  button{
+    background:#ff0000;
+    font-weight:bold;
+    cursor:pointer;
+  }
 
-.card{
-  display:flex;
-  gap:14px;
-  background:rgba(0,0,0,0.45);
-  border-radius:12px;
-  padding:12px;
-  margin-top:12px;
-  border-left:4px solid #00ffd5;
-}
+  .card{
+    display:flex;
+    gap:14px;
+    background:rgba(0,0,0,0.45);
+    border-radius:12px;
+    padding:12px;
+    margin-top:12px;
+    border-left:4px solid #00ffd5;
+  }
 
-.img-box{
-  display:flex;
-  gap:8px;
-}
+  .img-box{
+    display:flex;
+    gap:8px;
+  }
 
-.boss-img,.map-img{
-  width:160px;
-  height:160px;
-  object-fit:cover;
-  border-radius:8px;
-}
+  .boss-img,.map-img{
+    width:160px;
+    height:160px;
+    object-fit:cover;
+    border-radius:8px;
+  }
 
-.boss-img{
-  border:2px solid #00ffd5;
-}
+  .boss-img{
+    border:2px solid #00ffd5;
+  }
 
-.map-img{
-  border:2px solid #ffaa00;
-}
+  .map-img{
+    border:2px solid #ffaa00;
+  }
 
-.info b{
-  color:#00ffd5;
-}
+  .info b{
+    color:#00ffd5;
+  }
 
-.time{
-  margin-top:4px;
-  color:#7CFF00;
-}
+  .time{
+    margin-top:4px;
+    color:#7CFF00;
+  }
 
-.spawn-time{
-  color:#ff4d4d;
-  font-weight:bold;
-}
+  .spawn-time{
+    color:#ff4d4d;
+    font-weight:bold;
+  }
 
-.hunter {
-  color: #FFD700;
-  font-weight: bold;
-}
-.window{
-  margin-top:4px;
-  font-weight:bold;
-}
+  .hunter {
+    color: #FFD700;
+    font-weight: bold;
+  }
+  .window{
+    margin-top:4px;
+    font-weight:bold;
+  }
 
-.CH1{color:#00e5ff}
-.CH2{color:#7CFF00}
-.CH3{color:#FFD700}
-.CH4{color:#FF9800}
-.CH5{color:#FF5252}
-.CH6{color:#FF00FF}
-.CH7{color:#00FF7F}
-.CH8{color:#FF4500}
+  .CH1{color:#00e5ff}
+  .CH2{color:#7CFF00}
+  .CH3{color:#FFD700}
+  .CH4{color:#FF9800}
+  .CH5{color:#FF5252}
+  .CH6{color:#FF00FF}
+  .CH7{color:#00FF7F}
+  .CH8{color:#FF4500}
 
-.delete{
-  background:#ff4d4d;
-  color:#fff;
-  margin-top:6px;
-}
+  .delete{
+    background:#ff4d4d;
+    color:#fff;
+    margin-top:6px;
+  }
 
-.reset{
-  background:#ffaa00;
-  color:#fff;
-  margin-top:6px;
-}
+  .reset{
+    background:#ffaa00;
+    color:#fff;
+    margin-top:6px;
+  }
 
-.edit{
-  background:#00aaff;
-  color:#fff;
-  margin-top:6px;
-}
+  .edit{
+    background:#00aaff;
+    color:#fff;
+    margin-top:6px;
+  }
 
-.boss-dead {
-  background:#ff4d4d;
-  color:#fff;
-  padding:6px 12px;
-  border:none;
-  border-radius:6px;
-  font-weight:bold;
-  cursor:pointer;
-  margin-left:4px;
-  transition: transform 0.1s;
-}
+  .boss-dead {
+    background:#ff4d4d;
+    color:#fff;
+    padding:6px 12px;
+    border:none;
+    border-radius:6px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-left:4px;
+    transition: transform 0.1s;
+  }
 
-.boss-dead:hover {
-  transform: scale(1.05);
-}
+  .boss-dead:hover {
+    transform: scale(1.05);
+  }
 
-/* ปุ่มค้นหา */
-#scrollBtn{
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  padding: 10px 14px;
-  border-radius: 8px;
-  background: #27f108;
-  color: #fff;
-  font-weight: bold;
-  cursor: pointer;
-  border: none;
-  box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-}
+  /* ปุ่มค้นหา */
+  #scrollBtn{
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    background: #27f108;
+    color: #fff;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+  }
 
-#searchInput{
-  width:250px;
-  padding:8px;
-  margin:4px;
-  border-radius:6px;
-  border:none;
-  font-size:16px;
-}
-#boss {
-  background: transparent;  /* โปร่งใส */
-  border: none;             /* ลบเส้นกรอบ */
-  appearance: none;         /* ลบลูกศรพื้นฐาน */
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  color: #fff;              /* สีข้อความ */
-  cursor: pointer;
-  padding: 4px 6px;
-}
+  #searchInput{
+    width:250px;
+    padding:8px;
+    margin:4px;
+    border-radius:6px;
+    border:none;
+    font-size:16px;
+  }
+  #boss {
+    background: transparent;  /* โปร่งใส */
+    border: none;             /* ลบเส้นกรอบ */
+    appearance: none;         /* ลบลูกศรพื้นฐาน */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    color: #fff;              /* สีข้อความ */
+    cursor: pointer;
+    padding: 4px 6px;
+  }
 
-</style>
-</head>
+  </style>
+  </head>
 
-<body>
+  <body>
 
-<h2>
-<img src="images/logo.png" class="logo">
-⏱ Boss Timer DARK HELL
-</h2>
+  <h2>
+  <img src="images/logo.png" class="logo">
+  ⏱ Boss Timer DARK HELL
+  </h2>
 
-<div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
-  <select id="map"></select>
-  <select id="channel"></select>
-  <input type="text" id="hunterInput" placeholder="ใส่ชื่อผู้ล่า">
-  <select id="boss"></select>
-  <button class="boss-dead" onclick="bossDead()">บอสตาย</button>
-</div>
+  <div style="display:flex; gap:6px; align-items:center; margin-bottom:6px;">
+    <select id="map"></select>
+    <select id="channel"></select>
+    <input type="text" id="hunterInput" placeholder="ใส่ชื่อผู้ล่า">
+    <select id="boss"></select>
+    <button class="boss-dead" onclick="bossDead()">บอสตาย</button>
+  </div>
 
-<!-- 🔍 ช่องค้นหา -->
-<input type="text" id="searchInput" placeholder="🔍 ค้นหาแมพ / บอส...">
+  <!-- 🔍 ช่องค้นหา -->
+  <input type="text" id="searchInput" placeholder="🔍 ค้นหาแมพ / บอส...">
 
-<h3>รายการจับเวลา</h3>
-<div id="timers"></div>
+  <h3>รายการจับเวลา</h3>
+  <div id="timers"></div>
 
-<!-- ปุ่มเลื่อนขึ้นช่องผู้ล่า -->
-<button id="scrollBtn" onclick="scrollToHunter()">🔝 ไปยังช่องค้นหา</button>
+  <!-- ปุ่มเลื่อนขึ้นช่องผู้ล่า -->
+  <button id="scrollBtn" onclick="scrollToHunter()">🔝 ไปยังช่องค้นหา</button>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
-  authDomain: "bosstimer-22b86.firebaseapp.com",
-  databaseURL: "https://bosstimer-22b86-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "bosstimer-22b86"
-};
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
+  <script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyAEM4uVT9aZ6nU77HdNVetxqc7JuU8X2lk",
+    authDomain: "bosstimer-22b86.firebaseapp.com",
+    databaseURL: "https://bosstimer-22b86-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "bosstimer-22b86"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
 
-const NORMAL_RESPAWN = { min: 20, max: 30 };
-const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
+  const NORMAL_RESPAWN = { min: 20, max: 30 };
+  const SPECIAL_RESPAWN = { "จินโฮ": { min: 120, max: 180 } };
 
-const BOSS_IMAGES = {
-  "หัวหน้าลามะชั่ว":"images/1.png","โฮนโดนยักษ์":"images/2.png","อสูรไร้หัว":"images/3.png",
-  "ยอยอวา":"images/4.png","ผีปังตอยักษ์":"images/5.png","ต้นไม้ปีศาจหมื่นปี":"images/6.png",
-  "ราชามาโบก":"images/7.png","พญาเต่าจอมตะกล":"images/15.png","ปีศาจแสงจันทร์":"images/17.png",
-  "ยักษ์หินคึมกัง":"images/8.png","ราชาอินโฮ":"images/9.png","เบี้ยสีม่วง":"images/10.png",
-  "หัวหน้าซานซีน":"images/11.png","สมุนวานร":"images/12.png","นักบวชมูโฮน":"images/13.png",
-  "จอมเวทย์ซุลซา":"images/14.png","พญาวัวอสูร":"images/16.png","มิโนทอร์":"images/18.png",
-  "จินโฮ":"images/40.png"
-};
+  const BOSS_IMAGES = {
+    "หัวหน้าลามะชั่ว":"images/1.png","โฮนโดนยักษ์":"images/2.png","อสูรไร้หัว":"images/3.png",
+    "ยอยอวา":"images/4.png","ผีปังตอยักษ์":"images/5.png","ต้นไม้ปีศาจหมื่นปี":"images/6.png",
+    "ราชามาโบก":"images/7.png","พญาเต่าจอมตะกล":"images/15.png","ปีศาจแสงจันทร์":"images/17.png",
+    "ยักษ์หินคึมกัง":"images/8.png","ราชาอินโฮ":"images/9.png","เบี้ยสีม่วง":"images/10.png",
+    "หัวหน้าซานซีน":"images/11.png","สมุนวานร":"images/12.png","นักบวชมูโฮน":"images/13.png",
+    "จอมเวทย์ซุลซา":"images/14.png","พญาวัวอสูร":"images/16.png","มิโนทอร์":"images/18.png",
+    "จินโฮ":"images/40.png"
+  };
 
-const MAP_IMAGES={
-  "ทับอีชา (อัพ4)":"images/map_tabicha.png","วาชองจี (อัพ4)":"images/map_wachongji.png",
-  "สุสานจักรพรรดิ์ (อัพ5)":"images/map_tomb.png","ชองจู (อัพ5)":"images/map_cheongju.png",
-  "แม่น้ำวังฮา (อัพ6)":"images/map_river.png","ทางเข้าถ้ำหินโยงมุน (อัพ6)":"images/map_yongmun.png",
-  "ทางเข้าถ้ำมักโก (อัพ7)":"images/map_makgo.png","ทะเลสาบโทซอง (อัพ7)":"images/map_lake.png",
-  "ถ้ำมักโกชั่นที่2 (อัพ7)":"images/map_makgo2.png","บริเวณแม่น้ำวังฮา (อัพ8)":"images/map_river2.png",
-  "ภูเขาแทซานใต้ (อัพ8)":"images/map_taesan_s.png","ภูเขาซุงซาน (อัพ8)":"images/map_sungsan.png",
-  "ยอดเขาแทซาน (อัพ9)":"images/map_taesan_top.png","ทางเหนือของภูเขาแทซาน (อัพ9)":"images/map_taesan_n.png",
-  "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png","กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
-  "โทนวัง (อัพ10)":"images/map_tonwang.png","ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
-  "ห้องจินโฮ":"images/map_jinho.png"
-};
+  const MAP_IMAGES={
+    "ทับอีชา (อัพ4)":"images/map_tabicha.png","วาชองจี (อัพ4)":"images/map_wachongji.png",
+    "สุสานจักรพรรดิ์ (อัพ5)":"images/map_tomb.png","ชองจู (อัพ5)":"images/map_cheongju.png",
+    "แม่น้ำวังฮา (อัพ6)":"images/map_river.png","ทางเข้าถ้ำหินโยงมุน (อัพ6)":"images/map_yongmun.png",
+    "ทางเข้าถ้ำมักโก (อัพ7)":"images/map_makgo.png","ทะเลสาบโทซอง (อัพ7)":"images/map_lake.png",
+    "ถ้ำมักโกชั่นที่2 (อัพ7)":"images/map_makgo2.png","บริเวณแม่น้ำวังฮา (อัพ8)":"images/map_river2.png",
+    "ภูเขาแทซานใต้ (อัพ8)":"images/map_taesan_s.png","ภูเขาซุงซาน (อัพ8)":"images/map_sungsan.png",
+    "ยอดเขาแทซาน (อัพ9)":"images/map_taesan_top.png","ทางเหนือของภูเขาแทซาน (อัพ9)":"images/map_taesan_n.png",
+    "วัดเส้าหลิน (อัพ9)":"images/map_shaolin.png","กำแพงเมืองจีน (อัพ10)":"images/map_wall.png",
+    "โทนวัง (อัพ10)":"images/map_tonwang.png","ภูเขาวายอม (อัพ10)":"images/map_wayom.png",
+    "ห้องจินโฮ":"images/map_jinho.png"
+  };
 
-// BOSS_DATA แบบเต็มตามเดิม
-const BOSS_DATA = {
-  "ทับอีชา (อัพ4)": {"CH1":["หัวหน้าลามะชั่ว"],"CH2":["หัวหน้าลามะชั่ว"],"CH3":["หัวหน้าลามะชั่ว"],"CH4":["หัวหน้าลามะชั่ว"],"CH5":["หัวหน้าลามะชั่ว"]},
-  "วาชองจี (อัพ4)": {"CH1":["โฮนโดนยักษ์"],"CH2":["โฮนโดนยักษ์"],"CH3":["โฮนโดนยักษ์"],"CH4":["โฮนโดนยักษ์"],"CH5":["โฮนโดนยักษ์"]},
-  "สุสานจักรพรรดิ์ (อัพ5)": {"CH1":["อสูรไร้หัว"],"CH2":["อสูรไร้หัว"],"CH3":["อสูรไร้หัว"],"CH4":["อสูรไร้หัว"],"CH5":["อสูรไร้หัว"]},
-  "ชองจู (อัพ5)": {"CH1":["ยอยอวา"],"CH2":["ยอยอวา"],"CH3":["ยอยอวา"],"CH4":["ยอยอวา"],"CH5":["ยอยอวา"]},
-  "แม่น้ำวังฮา (อัพ6)": {"CH1":["ผีปังตอยักษ์"],"CH2":["ผีปังตอยักษ์"],"CH3":["ผีปังตอยักษ์"],"CH4":["ผีปังตอยักษ์"],"CH5":["ผีปังตอยักษ์"]},
-  "ทางเข้าถ้ำหินโยงมุน (อัพ6)": {"CH1":["ต้นไม้ปีศาจหมื่นปี"],"CH2":["ต้นไม้ปีศาจหมื่นปี"],"CH3":["ต้นไม้ปีศาจหมื่นปี"],"CH4":["ต้นไม้ปีศาจหมื่นปี"],"CH5":["ต้นไม้ปีศาจหมื่นปี"]},
-  "ทางเข้าถ้ำมักโก (อัพ7)": {"CH1":["ราชามาโบก"],"CH2":["ราชามาโบก"],"CH3":["ราชามาโบก"],"CH4":["ราชามาโบก"],"CH5":["ราชามาโบก"]},
-  "ทะเลสาบโทซอง (อัพ7)": {"CH1":["พญาเต่าจอมตะกล"],"CH2":["พญาเต่าจอมตะกล"],"CH3":["พญาเต่าจอมตะกล"],"CH4":["พญาเต่าจอมตะกล"],"CH5":["พญาเต่าจอมตะกล"]},
-  "ถ้ำมักโกชั่นที่2 (อัพ7)": {"CH1":["ปีศาจแสงจันทร์"],"CH2":["ปีศาจแสงจันทร์"],"CH3":["ปีศาจแสงจันทร์"],"CH4":["ปีศาจแสงจันทร์"],"CH5":["ปีศาจแสงจันทร์"]},
-  "บริเวณแม่น้ำวังฮา (อัพ8)": {"CH1":["ยักษ์หินคึมกัง"],"CH2":["ยักษ์หินคึมกัง"],"CH3":["ยักษ์หินคึมกัง"],"CH4":["ยักษ์หินคึมกัง"],"CH5":["ยักษ์หินคึมกัง"]},
-  "ภูเขาแทซานใต้ (อัพ8)": {"CH1":["ราชาอินโฮ"],"CH2":["ราชาอินโฮ"],"CH3":["ราชาอินโฮ"],"CH4":["ราชาอินโฮ"],"CH5":["ราชาอินโฮ"]},
-  "ภูเขาซุงซาน (อัพ8)": {"CH1":["เบี้ยสีม่วง"],"CH2":["เบี้ยสีม่วง"],"CH3":["เบี้ยสีม่วง"],"CH4":["เบี้ยสีม่วง"],"CH5":["เบี้ยสีม่วง"]},
-  "ยอดเขาแทซาน (อัพ9)": {"CH1":["หัวหน้าซานซีน"],"CH2":["หัวหน้าซานซีน"],"CH3":["หัวหน้าซานซีน"],"CH4":["หัวหน้าซานซีน"],"CH5":["หัวหน้าซานซีน"]},
+  // BOSS_DATA แบบเต็มตามเดิม
+  const BOSS_DATA = {
+    "ทับอีชา (อัพ4)": {"CH1":["หัวหน้าลามะชั่ว"],"CH2":["หัวหน้าลามะชั่ว"],"CH3":["หัวหน้าลามะชั่ว"],"CH4":["หัวหน้าลามะชั่ว"],"CH5":["หัวหน้าลามะชั่ว"]},
+    "วาชองจี (อัพ4)": {"CH1":["โฮนโดนยักษ์"],"CH2":["โฮนโดนยักษ์"],"CH3":["โฮนโดนยักษ์"],"CH4":["โฮนโดนยักษ์"],"CH5":["โฮนโดนยักษ์"]},
+    "สุสานจักรพรรดิ์ (อัพ5)": {"CH1":["อสูรไร้หัว"],"CH2":["อสูรไร้หัว"],"CH3":["อสูรไร้หัว"],"CH4":["อสูรไร้หัว"],"CH5":["อสูรไร้หัว"]},
+    "ชองจู (อัพ5)": {"CH1":["ยอยอวา"],"CH2":["ยอยอวา"],"CH3":["ยอยอวา"],"CH4":["ยอยอวา"],"CH5":["ยอยอวา"]},
+    "แม่น้ำวังฮา (อัพ6)": {"CH1":["ผีปังตอยักษ์"],"CH2":["ผีปังตอยักษ์"],"CH3":["ผีปังตอยักษ์"],"CH4":["ผีปังตอยักษ์"],"CH5":["ผีปังตอยักษ์"]},
+    "ทางเข้าถ้ำหินโยงมุน (อัพ6)": {"CH1":["ต้นไม้ปีศาจหมื่นปี"],"CH2":["ต้นไม้ปีศาจหมื่นปี"],"CH3":["ต้นไม้ปีศาจหมื่นปี"],"CH4":["ต้นไม้ปีศาจหมื่นปี"],"CH5":["ต้นไม้ปีศาจหมื่นปี"]},
+    "ทางเข้าถ้ำมักโก (อัพ7)": {"CH1":["ราชามาโบก"],"CH2":["ราชามาโบก"],"CH3":["ราชามาโบก"],"CH4":["ราชามาโบก"],"CH5":["ราชามาโบก"]},
+    "ทะเลสาบโทซอง (อัพ7)": {"CH1":["พญาเต่าจอมตะกล"],"CH2":["พญาเต่าจอมตะกล"],"CH3":["พญาเต่าจอมตะกล"],"CH4":["พญาเต่าจอมตะกล"],"CH5":["พญาเต่าจอมตะกล"]},
+    "ถ้ำมักโกชั่นที่2 (อัพ7)": {"CH1":["ปีศาจแสงจันทร์"],"CH2":["ปีศาจแสงจันทร์"],"CH3":["ปีศาจแสงจันทร์"],"CH4":["ปีศาจแสงจันทร์"],"CH5":["ปีศาจแสงจันทร์"]},
+    "บริเวณแม่น้ำวังฮา (อัพ8)": {"CH1":["ยักษ์หินคึมกัง"],"CH2":["ยักษ์หินคึมกัง"],"CH3":["ยักษ์หินคึมกัง"],"CH4":["ยักษ์หินคึมกัง"],"CH5":["ยักษ์หินคึมกัง"]},
+    "ภูเขาแทซานใต้ (อัพ8)": {"CH1":["ราชาอินโฮ"],"CH2":["ราชาอินโฮ"],"CH3":["ราชาอินโฮ"],"CH4":["ราชาอินโฮ"],"CH5":["ราชาอินโฮ"]},
+    "ภูเขาซุงซาน (อัพ8)": {"CH1":["เบี้ยสีม่วง"],"CH2":["เบี้ยสีม่วง"],"CH3":["เบี้ยสีม่วง"],"CH4":["เบี้ยสีม่วง"],"CH5":["เบี้ยสีม่วง"]},
+    "ยอดเขาแทซาน (อัพ9)": {"CH1":["หัวหน้าซานซีน"],"CH2":["หัวหน้าซานซีน"],"CH3":["หัวหน้าซานซีน"],"CH4":["หัวหน้าซานซีน"],"CH5":["หัวหน้าซานซีน"]},
 
-  // แมพ 5 ตัวนี้ 8 แชแนล
-  "ทางเหนือของภูเขาแทซาน (อัพ9)": {"CH1":["สมุนวานร"],"CH2":["สมุนวานร"],"CH3":["สมุนวานร"],"CH4":["สมุนวานร"],"CH5":["สมุนวานร"],"CH6":["สมุนวานร"],"CH7":["สมุนวานร"],"CH8":["สมุนวานร"]},
-  "วัดเส้าหลิน (อัพ9)": {"CH1":["นักบวชมูโฮน"],"CH2":["นักบวชมูโฮน"],"CH3":["นักบวชมูโฮน"],"CH4":["นักบวชมูโฮน"],"CH5":["นักบวชมูโฮน"],"CH6":["นักบวชมูโฮน"],"CH7":["นักบวชมูโฮน"],"CH8":["นักบวชมูโฮน"]},
-  "กำแพงเมืองจีน (อัพ10)": {"CH1":["จอมเวทย์ซุลซา"],"CH2":["จอมเวทย์ซุลซา"],"CH3":["จอมเวทย์ซุลซา"],"CH4":["จอมเวทย์ซุลซา"],"CH5":["จอมเวทย์ซุลซา"],"CH6":["จอมเวทย์ซุลซา"],"CH7":["จอมเวทย์ซุลซา"],"CH8":["จอมเวทย์ซุลซา"]},
-  "โทนวัง (อัพ10)": {"CH1":["พญาวัวอสูร"],"CH2":["พญาวัวอสูร"],"CH3":["พญาวัวอสูร"],"CH4":["พญาวัวอสูร"],"CH5":["พญาวัวอสูร"],"CH6":["พญาวัวอสูร"],"CH7":["พญาวัวอสูร"],"CH8":["พญาวัวอสูร"]},
-  "ภูเขาวายอม (อัพ10)": {"CH1":["มิโนทอร์"],"CH2":["มิโนทอร์"],"CH3":["มิโนทอร์"],"CH4":["มิโนทอร์"],"CH5":["มิโนทอร์"],"CH6":["มิโนทอร์"],"CH7":["มิโนทอร์"],"CH8":["มิโนทอร์"]},
+    // แมพ 5 ตัวนี้ 8 แชแนล
+    "ทางเหนือของภูเขาแทซาน (อัพ9)": {"CH1":["สมุนวานร"],"CH2":["สมุนวานร"],"CH3":["สมุนวานร"],"CH4":["สมุนวานร"],"CH5":["สมุนวานร"],"CH6":["สมุนวานร"],"CH7":["สมุนวานร"],"CH8":["สมุนวานร"]},
+    "วัดเส้าหลิน (อัพ9)": {"CH1":["นักบวชมูโฮน"],"CH2":["นักบวชมูโฮน"],"CH3":["นักบวชมูโฮน"],"CH4":["นักบวชมูโฮน"],"CH5":["นักบวชมูโฮน"],"CH6":["นักบวชมูโฮน"],"CH7":["นักบวชมูโฮน"],"CH8":["นักบวชมูโฮน"]},
+    "กำแพงเมืองจีน (อัพ10)": {"CH1":["จอมเวทย์ซุลซา"],"CH2":["จอมเวทย์ซุลซา"],"CH3":["จอมเวทย์ซุลซา"],"CH4":["จอมเวทย์ซุลซา"],"CH5":["จอมเวทย์ซุลซา"],"CH6":["จอมเวทย์ซุลซา"],"CH7":["จอมเวทย์ซุลซา"],"CH8":["จอมเวทย์ซุลซา"]},
+    "โทนวัง (อัพ10)": {"CH1":["พญาวัวอสูร"],"CH2":["พญาวัวอสูร"],"CH3":["พญาวัวอสูร"],"CH4":["พญาวัวอสูร"],"CH5":["พญาวัวอสูร"],"CH6":["พญาวัวอสูร"],"CH7":["พญาวัวอสูร"],"CH8":["พญาวัวอสูร"]},
+    "ภูเขาวายอม (อัพ10)": {"CH1":["มิโนทอร์"],"CH2":["มิโนทอร์"],"CH3":["มิโนทอร์"],"CH4":["มิโนทอร์"],"CH5":["มิโนทอร์"],"CH6":["มิโนทอร์"],"CH7":["มิโนทอร์"],"CH8":["มิโนทอร์"]},
 
-  "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
-};
+    "ห้องจินโฮ": {"CH1":["จินโฮ"],"CH2":["จินโฮ"],"CH3":["จินโฮ"],"CH4":["จินโฮ"],"CH5":["จินโฮ"]}
+  };
 
-// 🔹 Elements
-const mapSel=document.getElementById("map");
-const chSel=document.getElementById("channel");
-const bossSel=document.getElementById("boss");
-const hunterInput=document.getElementById("hunterInput");
-const timersDiv=document.getElementById("timers");
-const searchInput=document.getElementById("searchInput");
+  // 🔹 Elements
+  const mapSel=document.getElementById("map");
+  const chSel=document.getElementById("channel");
+  const bossSel=document.getElementById("boss");
+  const hunterInput=document.getElementById("hunterInput");
+  const timersDiv=document.getElementById("timers");
+  const searchInput=document.getElementById("searchInput");
 
-let timersData={};
+  let timersData={};
 
-function init(){
-  for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
-  updateChannels();
+  function init(){
+    for(let m in BOSS_DATA) mapSel.innerHTML+=`<option>${m}</option>`;
+    updateChannels();
 
-  db.ref("bossTimers").on("value",snap=>{
-    timersData=snap.val()||{};
-    render();
-  });
-}
-
-function updateChannels(){
-  const currentMap = mapSel.value;
-  chSel.innerHTML = "";
-
-  for(let c in BOSS_DATA[currentMap]){
-    const hasActive = Object.keys(timersData).some(key=>{
-      const [map,ch] = key.split("|");
-      return map === currentMap && ch === c;
+    db.ref("bossTimers").on("value",snap=>{
+      timersData=snap.val()||{};
+      render();
     });
-
-    const opt = document.createElement("option");
-    opt.value = c;
-    opt.textContent = hasActive ? `${c} [กำลังจับเวลา]` : c;
-    if(hasActive) opt.style.color = "#00ff00";
-
-    chSel.appendChild(opt);
   }
-}
 
-function updateBosses(){
-  bossSel.innerHTML="";
-  BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
-  setTimeout(()=>hunterInput.focus(),10);
-}
+  function updateChannels(){
+    const currentMap = mapSel.value;
+    chSel.innerHTML = "";
 
-mapSel.onchange = updateChannels;
-chSel.onchange = updateBosses;
+    for(let c in BOSS_DATA[currentMap]){
+      const hasActive = Object.keys(timersData).some(key=>{
+        const [map,ch] = key.split("|");
+        return map === currentMap && ch === c;
+      });
 
-function bossDead(){
-  const hunterName = hunterInput.value.trim();
-  if(!hunterName){ alert("กรุณาใส่ชื่อผู้ล่า!"); return; }
+      const opt = document.createElement("option");
+      opt.value = c;
+      opt.textContent = hasActive ? `${c} [กำลังจับเวลา]` : c;
+      if(hasActive) opt.style.color = "#00ff00";
 
-  const boss = BOSS_DATA[mapSel.value][chSel.value][0]; // บอสตัวแรก
-  const key=`${mapSel.value}|${chSel.value}|${boss}`;
-  const now=Date.now();
-  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
-
-  db.ref("bossTimers/"+key).set({
-    start: now,
-    minTime: now + r.min*60000,
-    maxTime: now + r.max*60000,
-    hunter: hunterName
-  });
-}
-function editHunter(key){
-  const currentName = timersData[key]?.hunter || "";
-  const newName = prompt("แก้ไขชื่อผู้ล่า:", currentName);
-  if(newName !== null){ // ถ้าไม่กดยกเลิก
-    db.ref("bossTimers/"+key).update({hunter: newName.trim()});
+      chSel.appendChild(opt);
+    }
   }
-}
 
-function resetTimer(key){
-  const parts=key.split("|");
-  const boss=parts[2];
-  const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
-  const now=Date.now();
-  db.ref("bossTimers/"+key).set({
-    start:now,
-    minTime:now+r.min*60000,
-    maxTime:now+r.max*60000,
-    hunter:timersData[key]?.hunter||""
-  });
-}
+  function updateBosses(){
+    bossSel.innerHTML="";
+    BOSS_DATA[mapSel.value][chSel.value].forEach(b=>bossSel.innerHTML+=`<option>${b}</option>`);
+    setTimeout(()=>hunterInput.focus(),10);
+  }
 
-function deleteTimer(key){
-  db.ref("bossTimers/"+key).remove();
-}
+  mapSel.onchange = updateChannels;
+  chSel.onchange = updateBosses;
+
+  function bossDead(){
+    const hunterName = hunterInput.value.trim();
+    if(!hunterName){ alert("กรุณาใส่ชื่อผู้ล่า!"); return; }
+
+    const boss = BOSS_DATA[mapSel.value][chSel.value][0]; // บอสตัวแรก
+    const key=`${mapSel.value}|${chSel.value}|${boss}`;
+    const now=Date.now();
+    const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
+
+    db.ref("bossTimers/"+key).set({
+      start: now,
+      minTime: now + r.min*60000,
+      maxTime: now + r.max*60000,
+      hunter: hunterName
+    });
+  }
+  function editHunter(key){
+    const currentName = timersData[key]?.hunter || "";
+    const newName = prompt("แก้ไขชื่อผู้ล่า:", currentName);
+    if(newName !== null){ // ถ้าไม่กดยกเลิก
+      db.ref("bossTimers/"+key).update({hunter: newName.trim()});
+    }
+  }
+
+  function resetTimer(key){
+    const parts=key.split("|");
+    const boss=parts[2];
+    const r=SPECIAL_RESPAWN[boss]||NORMAL_RESPAWN;
+    const now=Date.now();
+    db.ref("bossTimers/"+key).set({
+      start:now,
+      minTime:now+r.min*60000,
+      maxTime:now+r.max*60000,
+      hunter:timersData[key]?.hunter||""
+    });
+  }
+
+  function deleteTimer(key){
+    db.ref("bossTimers/"+key).remove();
+  }
 
 function fmt(ms){
-  const s=Math.floor(ms/1000);
-  const m=Math.floor(s/60);
-  return `${String(m).padStart(2,"0")}:${String(s%60).padStart(2,"0")}`;
+  const totalSeconds = Math.floor(ms/1000);
+
+  const h = Math.floor(totalSeconds / 3600);
+  const m = Math.floor((totalSeconds % 3600) / 60);
+  const s = totalSeconds % 60;
+
+  // ถ้ามีชั่วโมง แสดง hh:mm:ss
+  if(h > 0){
+    return `${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+  }
+
+  // ถ้ายังไม่ถึงชั่วโมง แสดง mm:ss เหมือนเดิม
+  return `${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
 
-function render(){
-  timersDiv.innerHTML="";
-  const now=Date.now();
-  const keyword = searchInput.value.toLowerCase();
+  function render(){
+    timersDiv.innerHTML="";
+    const now=Date.now();
+    const keyword = searchInput.value.toLowerCase();
 
-  Object.keys(timersData).sort((a,b)=>timersData[b].start - timersData[a].start)
-  .forEach(k=>{
-    const t = timersData[k];
-    if(!t.start) return;
-    const [map,ch,boss]=k.split("|");
+    Object.keys(timersData).sort((a,b)=>timersData[b].start - timersData[a].start)
+    .forEach(k=>{
+      const t = timersData[k];
+      if(!t.start) return;
+      const [map,ch,boss]=k.split("|");
 
-    // filter
-    if(keyword && !map.toLowerCase().includes(keyword) && !boss.toLowerCase().includes(keyword)) return;
+      // filter
+      if(keyword && !map.toLowerCase().includes(keyword) && !boss.toLowerCase().includes(keyword)) return;
 
-    timersDiv.innerHTML+=`
-<div class="card">
-  <div class="img-box">
-    <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
-    <img src="${MAP_IMAGES[map]||''}" class="map-img">
-  </div>
-  <div class="info">
-    <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
-    <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
-    <div class="time spawn-time">
-      🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}
+      timersDiv.innerHTML+=`
+  <div class="card">
+    <div class="img-box">
+      <img src="${BOSS_IMAGES[boss]||''}" class="boss-img">
+      <img src="${MAP_IMAGES[map]||''}" class="map-img">
     </div>
-    <div class="time">
-      🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span>
+    <div class="info">
+      <b>${map} | <span class="${ch}">${ch}</span> | ${boss}</b>
+      <div class="time">⏱ เวลา: ${fmt(now-t.start)}</div>
+      <div class="time spawn-time">
+        🕒 ${new Date(t.minTime).toLocaleTimeString()} - ${new Date(t.maxTime).toLocaleTimeString()}
+      </div>
+      <div class="time">
+        🏹 ผู้ล่า: <span class="hunter">${t.hunter||"-"}</span>
+      </div>
+      <div class="window">${now>=t.minTime&&now<=t.maxTime?"✅ อยู่ในช่วงเกิด":now>t.maxTime?"⛔ ครบเวลาแล้ว":"⏳ ยังไม่เกิด"}</div>
+  <button class="reset" onclick="if(confirm('คุณต้องการรีเซ็ตเวลานี้หรือไม่?')) resetTimer('${k}')">รีเซ็ตเวลา</button>
+  <button class="delete" onclick="if(confirm('คุณต้องการลบเวลานี้หรือไม่?')) deleteTimer('${k}')">ลบ</button>
+  <button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
     </div>
-    <div class="window">${now>=t.minTime&&now<=t.maxTime?"✅ อยู่ในช่วงเกิด":now>t.maxTime?"⛔ ครบเวลาแล้ว":"⏳ ยังไม่เกิด"}</div>
-<button class="reset" onclick="if(confirm('คุณต้องการรีเซ็ตเวลานี้หรือไม่?')) resetTimer('${k}')">รีเซ็ตเวลา</button>
-<button class="delete" onclick="if(confirm('คุณต้องการลบเวลานี้หรือไม่?')) deleteTimer('${k}')">ลบ</button>
-<button class="edit" onclick="editHunter('${k}')">แก้ไขชื่อผู้ล่า</button>
-  </div>
-</div>`;
-  });
-}
+  </div>`;
+    });
+  }
 
-searchInput.addEventListener("input", render);
+  searchInput.addEventListener("input", render);
 
-// 🔹 ปุ่มเลื่อนขึ้นช่องผู้ล่า
-function scrollToHunter(){
-  hunterInput.scrollIntoView({behavior:"smooth",block:"center"});
-  hunterInput.focus();
-}
+  // 🔹 ปุ่มเลื่อนขึ้นช่องผู้ล่า
+  function scrollToHunter(){
+    hunterInput.scrollIntoView({behavior:"smooth",block:"center"});
+    hunterInput.focus();
+  }
 
-// 🔹 อัปเดต render ทุกวินาที
-setInterval(render,1000);
+  // 🔹 อัปเดต render ทุกวินาที
+  setInterval(render,1000);
 
-init();
-</script>
-</body>
-</html>
+  init();
+  </script>
+  </body>
+  </html>
